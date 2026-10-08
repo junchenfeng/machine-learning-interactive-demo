@@ -1,10 +1,12 @@
-// ABOUTME: 应用入口：渲染外壳并管理三个 Tab 的切换与懒加载
+// ABOUTME: 应用入口：渲染外壳并管理四个 Tab 的切换与懒加载
 import { TABS, activateTab, renderShell } from './components/header';
 import type { TabId } from './components/header';
 import { renderSpeciesIntro } from './components/tab1-species';
 import { renderDatasetIntro } from './components/tab2-dataset';
 import { renderExplore } from './components/tab3-explore';
 import type { ExploreTab } from './components/tab3-explore';
+import { renderClassify } from './components/tab4-classify';
+import type { ClassifyTab } from './components/tab4-classify';
 
 export function initApp(): void {
   const app = document.getElementById('app');
@@ -18,7 +20,8 @@ export function initApp(): void {
   const panelSpecies = document.getElementById('panel-species');
   const panelDataset = document.getElementById('panel-dataset');
   const panelExplore = document.getElementById('panel-explore');
-  if (!panelSpecies || !panelDataset || !panelExplore) return;
+  const panelClassify = document.getElementById('panel-classify');
+  if (!panelSpecies || !panelDataset || !panelExplore || !panelClassify) return;
 
   renderSpeciesIntro(panelSpecies);
 
@@ -27,9 +30,11 @@ export function initApp(): void {
     species: panelSpecies,
     dataset: panelDataset,
     explore: panelExplore,
+    classify: panelClassify,
   };
-  const inited: Record<TabId, boolean> = { species: true, dataset: false, explore: false };
+  const inited: Record<TabId, boolean> = { species: true, dataset: false, explore: false, classify: false };
   let exploreTab: ExploreTab | null = null;
+  let classifyTab: ClassifyTab | null = null;
   let current: TabId = 'species';
 
   function show(tab: TabId): void {
@@ -46,9 +51,13 @@ export function initApp(): void {
       } else if (tab === 'explore') {
         exploreTab = renderExplore(panels.explore);
         inited.explore = true;
+      } else if (tab === 'classify') {
+        classifyTab = renderClassify(panels.classify);
+        inited.classify = true;
       }
     }
     if (tab === 'explore') exploreTab?.onShow();
+    if (tab === 'classify') classifyTab?.onShow();
   }
 
   const nav = document.getElementById('tab-nav');

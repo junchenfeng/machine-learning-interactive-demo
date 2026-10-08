@@ -1,5 +1,5 @@
 // ABOUTME: 页面外壳：顶部横幅、Tab 导航（吸顶）、主内容容器与页脚
-export type TabId = 'species' | 'dataset' | 'explore';
+export type TabId = 'species' | 'dataset' | 'explore' | 'classify';
 
 export interface TabDef {
   id: TabId;
@@ -11,6 +11,7 @@ export const TABS: TabDef[] = [
   { id: 'species', label: '认识企鹅', step: '01' },
   { id: 'dataset', label: '认识数据集', step: '02' },
   { id: 'explore', label: '探索分析', step: '03' },
+  { id: 'classify', label: '初步分类', step: '04' },
 ];
 
 function iconPenguin(): string {
@@ -37,9 +38,21 @@ function iconScatter(): string {
   </svg>`;
 }
 
+function iconClassify(): string {
+  return `<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" aria-hidden="true">
+    <path d="M4 4v16h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    <path d="M7.5 18.5 20 6" stroke="currentColor" stroke-width="1.8" stroke-dasharray="2.5 2.2" stroke-linecap="round"/>
+    <circle cx="9.5" cy="9" r="1.7" fill="currentColor"/>
+    <circle cx="12.5" cy="12" r="1.7" fill="currentColor"/>
+    <circle cx="17.5" cy="16.5" r="1.7" fill="currentColor"/>
+    <circle cx="18.5" cy="9.5" r="1.7" fill="currentColor"/>
+  </svg>`;
+}
+
 export function tabIcon(id: TabId): string {
   if (id === 'species') return iconPenguin();
   if (id === 'dataset') return iconTable();
+  if (id === 'classify') return iconClassify();
   return iconScatter();
 }
 
@@ -91,6 +104,7 @@ export function renderShell(root: HTMLElement): void {
       <section id="panel-species"></section>
       <section id="panel-dataset" class="hidden"></section>
       <section id="panel-explore" class="hidden"></section>
+      <section id="panel-classify" class="hidden"></section>
     </main>
 
     <footer class="border-t border-polar-100 bg-white">

@@ -35,6 +35,8 @@ export interface ExploreChartOptions {
   mode: ExploreMode;
   features: FeatureKey[];
   records: PenguinRecord[];
+  /** 初步分类页的决策虚线；探索分析页不传 */
+  decisionLine?: DecisionLine | null;
 }
 
 interface ChartDatum {
@@ -46,7 +48,14 @@ interface ChartDatum {
 const FEATURE_MAP = new Map(FEATURES.map((f) => [f.key, f]));
 const MONO = 'ui-monospace, SF Mono, Cascadia Code, Consolas, Menlo, monospace';
 const Q1_SPECIES: Species[] = ['Adelie', 'Chinstrap'];
-const BILL_LENGTH_SPLIT = 45;
+
+/** 分类决策虚线（初步分类页使用，探索分析页不传则不画线） */
+export interface DecisionLine {
+  /** 单特征决策树：x = cutoff 的垂直虚线 */
+  vertical?: { x: number; label: string };
+  /** 双特征 OLS：裁剪到数据范围后的线段端点 */
+  segment?: { x1: number; y1: number; x2: number; y2: number; label: string };
+}
 
 /** 形状小图标（用于 HTML 图例） */
 export function symbolSvg(kind: 'circle' | 'triangle' | 'rect', color: string, size = 13): string {
@@ -136,7 +145,7 @@ export class ExploreChart {
   }
 
   update(opts: ExploreChartOptions): void {
-    const { mode, features, records } = opts;
+    const { mode, features, records, decisionLine } = opts;
     const is1D = features.length === 1;
     const f0 = FEATURE_MAP.get(features[0]);
     const f1 = is1D ? undefined : FEATURE_MAP.get(features[1]);
@@ -188,21 +197,47 @@ export class ExploreChart {
         emphasis: { scale: 1.35 },
       };
 
-      // 参考图：双特征 + X 为嘴长时，给出 45mm 决策参考虚线（仅问题一）
-      if (mode === 'species' && !is1D && features[0] === 'billLength' && gi === 0) {
-        base.markLine = {
-          silent: true,
-          symbol: 'none',
-          animation: false,
-          lineStyle: { color: '#8B9BAD', type: 'dashed', width: 2 },
-          label: {
-            formatter: `分界线 ${BILL_LENGTH_SPLIT} mm`,
-            color: '#5A7590',
-            fontSize: 12,
-            position: 'insideEndTop',
-          },
-          data: [{ xAxis: BILL_LENGTH_SPLIT }],
-        };
+      // 决策虚线只挂一次（首个系列）
+      if (gi === 0 && decisionLine) {
+        const lineStyle = { color: '#F97316', type: 'dashed' as const, width: 2.4 };
+        if (decisionLine.vertical) {
+          base.markLine = {
+            silent: true,
+            symbol: 'none',
+            animation: false,
+            lineStyle,
+            label: {
+              formatter: decisionLine.vertical.label,
+              color: '#12324F',
+              fontWeight: 700,
+              fontSize: 12,
+              position: 'insideEndTop',
+            },
+            data: [{ xAxis: decisionLine.vertical.x }],
+          };
+        } else if (decisionLine.segment) {
+          const s = decisionLine.segment;
+          base.markLine = {
+            silent: true,
+            symbol: 'none',
+            animation: false,
+            lineStyle,
+            label: {
+              formatter: s.label,
+              color: '#12324F',
+              fontWeight: 700,
+              fontSize: 12,
+              position: 'middle',
+              distance: 10,
+            },
+            data: [
+              [
+                { coord: [s.x1, s.y1] },
+                { coord: [s.x2, s.y2] },
+              ],
+            ],
+          };
+        }
       }
       return base;
     });

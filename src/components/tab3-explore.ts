@@ -135,7 +135,7 @@ export function renderExplore(container: HTMLElement): ExploreTab {
     const two = state.selected.length === 2;
     if (state.mode === 'species') {
       return two
-        ? '观察蓝色圆点和橙色三角：能画一条直线把它们大致分开吗？选了嘴的长度时，留意 45 mm 这条灰色虚线附近发生了什么。'
+        ? '观察蓝色圆点和橙色三角：能画一条直线把它们大致分开吗？选了嘴的长度时，留意 45 mm 附近发生了什么。'
         : '每一行代表一种企鹅。看看哪种特征上两行点堆"分得最开"？再把它保留，加选第二个特征试试。';
     }
     return two

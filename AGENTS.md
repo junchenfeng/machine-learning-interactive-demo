@@ -12,12 +12,16 @@
 │   ├── build.sh        # 构建脚本
 │   ├── dev.sh          # 开发环境启动脚本
 │   ├── prepare.sh      # 预处理脚本
+│   ├── precompute-classifiers.mjs  # 初步分类页模型预计算（node 一次性运行，产出 classifier-models.json）
 │   └── start.sh        # 生产环境启动脚本
 ├── server/             # 服务端逻辑
 │   ├── routes/         # API 路由
 │   ├── server.ts       # Express 服务入口
 │   └── vite.ts         # Vite 中间件集成
 ├── src/                # 前端源码
+│   ├── charts/         # ECharts 封装（penguin-chart.ts 含决策虚线能力）
+│   ├── components/     # Tab 页面：tab1-species / tab2-dataset / tab3-explore / tab4-classify、header
+│   ├── data/           # penguins.json 数据源、classifier-models.json 预计算模型、dataset.ts、types.ts
 │   ├── index.css       # 全局样式
 │   ├── index.ts        # 客户端入口
 │   └── main.ts         # 主逻辑
@@ -26,6 +30,12 @@
 ├── tsconfig.json       # TypeScript 配置
 └── vite.config.ts      # Vite 配置
 ```
+
+## 预计算模型说明（初步分类页）
+
+- 页面所用决策树 cutoff、OLS 系数、准确率、混淆矩阵**全部来自预计算**，前端只查表渲染，不做运行时训练。
+- 修改数据或模型定义后：运行 `node scripts/precompute-classifiers.mjs` 重新生成 `src/data/classifier-models.json`。
+- 模型定义：单特征 = 1 层决策树（加权 gini 最优切分）；双特征 = OLS 拟合 0/1 标签 + 0.5 cutoff；评估均在 2007-2008 训练集。
 
 ## 包管理规范
 

@@ -1,0 +1,413 @@
+{
+  "meta": {
+    "source": "Palmer Penguins LTER（2007-2008 训练数据）",
+    "treeRule": "x <= cutoff → 左叶类别；x > cutoff → 右叶类别",
+    "olsRule": "ŷ = b + w1*x1 + w2*x2；ŷ >= 0.5 → 类别 1"
+  },
+  "species": {
+    "classes": [
+      "Adelie",
+      "Chinstrap"
+    ],
+    "n": 143,
+    "tree": {
+      "billLength": {
+        "cutoff": 44.65,
+        "leftClass": 0,
+        "rightClass": 1,
+        "n": 143,
+        "correct": 137,
+        "accuracy": 0.958,
+        "cm": [
+          [
+            97,
+            2
+          ],
+          [
+            4,
+            40
+          ]
+        ]
+      },
+      "billDepth": {
+        "cutoff": 20.95,
+        "leftClass": 0,
+        "rightClass": 0,
+        "n": 143,
+        "correct": 99,
+        "accuracy": 0.6923,
+        "cm": [
+          [
+            99,
+            0
+          ],
+          [
+            44,
+            0
+          ]
+        ]
+      },
+      "flipper": {
+        "cutoff": 196.5,
+        "leftClass": 0,
+        "rightClass": 1,
+        "n": 143,
+        "correct": 108,
+        "accuracy": 0.7552,
+        "cm": [
+          [
+            91,
+            8
+          ],
+          [
+            27,
+            17
+          ]
+        ]
+      },
+      "mass": {
+        "cutoff": 2775,
+        "leftClass": 1,
+        "rightClass": 0,
+        "n": 143,
+        "correct": 100,
+        "accuracy": 0.6993,
+        "cm": [
+          [
+            99,
+            0
+          ],
+          [
+            43,
+            1
+          ]
+        ]
+      }
+    },
+    "ols": {
+      "billLength+billDepth": {
+        "w": [
+          0.076104,
+          -0.094447
+        ],
+        "b": -1.126658,
+        "n": 143,
+        "correct": 140,
+        "accuracy": 0.979,
+        "cm": [
+          [
+            98,
+            1
+          ],
+          [
+            2,
+            42
+          ]
+        ]
+      },
+      "billLength+flipper": {
+        "w": [
+          0.073282,
+          -0.003861
+        ],
+        "b": -2.01765,
+        "n": 143,
+        "correct": 137,
+        "accuracy": 0.958,
+        "cm": [
+          [
+            97,
+            2
+          ],
+          [
+            4,
+            40
+          ]
+        ]
+      },
+      "billLength+mass": {
+        "w": [
+          0.07759,
+          -0.000278
+        ],
+        "b": -1.896343,
+        "n": 143,
+        "correct": 138,
+        "accuracy": 0.965,
+        "cm": [
+          [
+            97,
+            2
+          ],
+          [
+            3,
+            41
+          ]
+        ]
+      },
+      "billDepth+flipper": {
+        "w": [
+          -0.066811,
+          0.028521
+        ],
+        "b": -3.894258,
+        "n": 143,
+        "correct": 104,
+        "accuracy": 0.7273,
+        "cm": [
+          [
+            91,
+            8
+          ],
+          [
+            31,
+            13
+          ]
+        ]
+      },
+      "billDepth+mass": {
+        "w": [
+          -0.007785,
+          0.000032
+        ],
+        "b": 0.332082,
+        "n": 143,
+        "correct": 99,
+        "accuracy": 0.6923,
+        "cm": [
+          [
+            99,
+            0
+          ],
+          [
+            44,
+            0
+          ]
+        ]
+      },
+      "flipper+mass": {
+        "w": [
+          0.031662,
+          -0.000238
+        ],
+        "b": -4.840454,
+        "n": 143,
+        "correct": 108,
+        "accuracy": 0.7552,
+        "cm": [
+          [
+            90,
+            9
+          ],
+          [
+            26,
+            18
+          ]
+        ]
+      }
+    }
+  },
+  "sex": {
+    "classes": [
+      "female",
+      "male"
+    ],
+    "n": 216,
+    "tree": {
+      "billLength": {
+        "cutoff": 47.75,
+        "leftClass": 0,
+        "rightClass": 1,
+        "n": 216,
+        "correct": 151,
+        "accuracy": 0.6991,
+        "cm": [
+          [
+            102,
+            5
+          ],
+          [
+            60,
+            49
+          ]
+        ]
+      },
+      "billDepth": {
+        "cutoff": 18.65,
+        "leftClass": 0,
+        "rightClass": 1,
+        "n": 216,
+        "correct": 146,
+        "accuracy": 0.6759,
+        "cm": [
+          [
+            97,
+            10
+          ],
+          [
+            60,
+            49
+          ]
+        ]
+      },
+      "flipper": {
+        "cutoff": 217.5,
+        "leftClass": 0,
+        "rightClass": 1,
+        "n": 216,
+        "correct": 133,
+        "accuracy": 0.6157,
+        "cm": [
+          [
+            104,
+            3
+          ],
+          [
+            80,
+            29
+          ]
+        ]
+      },
+      "mass": {
+        "cutoff": 3712.5,
+        "leftClass": 0,
+        "rightClass": 1,
+        "n": 216,
+        "correct": 157,
+        "accuracy": 0.7269,
+        "cm": [
+          [
+            60,
+            47
+          ],
+          [
+            12,
+            97
+          ]
+        ]
+      }
+    },
+    "ols": {
+      "billLength+billDepth": {
+        "w": [
+          0.042289,
+          0.111069
+        ],
+        "b": -3.252251,
+        "n": 216,
+        "correct": 167,
+        "accuracy": 0.7731,
+        "cm": [
+          [
+            88,
+            19
+          ],
+          [
+            30,
+            79
+          ]
+        ]
+      },
+      "billLength+flipper": {
+        "w": [
+          0.029118,
+          0.001847
+        ],
+        "b": -1.139037,
+        "n": 216,
+        "correct": 121,
+        "accuracy": 0.5602,
+        "cm": [
+          [
+            56,
+            51
+          ],
+          [
+            44,
+            65
+          ]
+        ]
+      },
+      "billLength+mass": {
+        "w": [
+          0.012861,
+          0.00023
+        ],
+        "b": -1.028265,
+        "n": 216,
+        "correct": 134,
+        "accuracy": 0.6204,
+        "cm": [
+          [
+            69,
+            38
+          ],
+          [
+            44,
+            65
+          ]
+        ]
+      },
+      "billDepth+flipper": {
+        "w": [
+          0.198656,
+          0.026748
+        ],
+        "b": -8.257366,
+        "n": 216,
+        "correct": 176,
+        "accuracy": 0.8148,
+        "cm": [
+          [
+            90,
+            17
+          ],
+          [
+            23,
+            86
+          ]
+        ]
+      },
+      "billDepth+mass": {
+        "w": [
+          0.179176,
+          0.000505
+        ],
+        "b": -4.6976,
+        "n": 216,
+        "correct": 198,
+        "accuracy": 0.9167,
+        "cm": [
+          [
+            97,
+            10
+          ],
+          [
+            8,
+            101
+          ]
+        ]
+      },
+      "flipper+mass": {
+        "w": [
+          -0.020344,
+          0.000594
+        ],
+        "b": 2.074601,
+        "n": 216,
+        "correct": 156,
+        "accuracy": 0.7222,
+        "cm": [
+          [
+            78,
+            29
+          ],
+          [
+            31,
+            78
+          ]
+        ]
+      }
+    }
+  }
+}
