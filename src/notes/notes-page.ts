@@ -50,9 +50,44 @@ function emptyHtml(note: ResearchNote): string {
     </div>`;
 }
 
+/**
+ * 页面上刊载的报告正文：只保留报告主体。
+ * 兜底切掉「给 Agent 的指令」与「附录 · 对话流水」——附录与学生 AI 的对话原文一律不上页面。
+ */
+function reportBody(raw: string): string {
+  let md = raw;
+  const guide = md.search(/^#{1,3}\s*给\s*Agent\s*的指令[^\n]*\n/m);
+  if (guide >= 0) {
+    const after = md.slice(guide);
+    const sep = after.search(/^---\s*$/m);
+    md = sep < 0 ? '' : after.slice(sep).replace(/^---\s*\n+/, '');
+  }
+  const appendix = md.search(/^#{1,3}\s*附录/m);
+  if (appendix >= 0) md = md.slice(0, appendix);
+  return md.trim();
+}
+
+/** 结论章（第四章）由学生与 AI 讨论后自己写下，整章按手写体渲染 */
+const HAND_CHAPTER = /^##\s*四、/m;
+
+/** 表格套一层横向滚动容器：列多、表头长时也不会撑出纸页边界 */
+function wrapTables(scope: HTMLElement): void {
+  scope.querySelectorAll('table').forEach((table) => {
+    if (table.parentElement?.classList.contains('note-table-scroll')) return;
+    const box = document.createElement('div');
+    box.className = 'note-table-scroll';
+    table.replaceWith(box);
+    box.append(table);
+  });
+}
+
 function contentHtml(note: ResearchNote): string {
   if (!hasContent(note)) return emptyHtml(note);
-  const html = marked(note.markdown, { async: false });
+  const body = reportBody(note.markdown);
+  const cut = body.search(HAND_CHAPTER);
+  const preset = cut < 0 ? body : body.slice(0, cut).trim();
+  const hand = cut < 0 ? '' : body.slice(cut).trim();
+  const handHtml = hand === '' ? '' : marked(hand, { async: false });
   return `
     <header class="mb-5 border-b border-dashed border-[#ddd2b8] pb-3">
       <div class="flex flex-wrap items-center gap-2">
@@ -61,7 +96,21 @@ function contentHtml(note: ResearchNote): string {
       </div>
       <p class="mono-num mt-1 text-[11.5px] text-mist">${note.subtitle}</p>
     </header>
-    <article class="note-prose">${html}</article>`;
+    <article class="note-prose">${marked(preset, { async: false })}</article>
+    ${
+      handHtml === ''
+        ? ''
+        : `<section class="note-hand-block">
+      <span class="note-hand-tag">
+        <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" aria-hidden="true">
+          <path d="M4 20h4L20 8l-4-4L4 16z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+          <path d="M14.5 5.5L18.5 9.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+        我的结论 · 我和 AI 讨论后自己写下
+      </span>
+      <article class="note-prose">${handHtml}</article>
+    </section>`
+    }`;
 }
 
 export function renderNotesPage(root: HTMLElement): void {
@@ -120,6 +169,7 @@ export function renderNotesPage(root: HTMLElement): void {
     const active = NOTES.find((n) => n.id === activeId);
     if (sheetEl && active) {
       sheetEl.innerHTML = contentHtml(active);
+      wrapTables(sheetEl);
       sheetEl.classList.remove('fade-up');
       // 触发一次重排，保证切页签时淡入动画重播
       void sheetEl.offsetWidth;

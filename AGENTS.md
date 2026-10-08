@@ -50,9 +50,9 @@
 
 ## 研究笔记页与对话记录接口
 
-- `/notes.html`：独立于五个 Tab 的笔记本页面，内容源 `src/data/research-notes.json`，`published: false` 的页签显示空白占位。发布流程（教师说「**发布笔记**」→ 写 `reports/research-note-{N}.md` 并同时更新 `src/data/research-notes.json` 的 `markdown` / `published`）见 `reports/README.md`。
+- `/notes.html`：独立于五个 Tab 的笔记本页面，内容源 `src/data/research-notes.json`，`published: false` 的页签显示空白占位。页面刊载的是**真实研究报告体**：`## 摘要` + 一、研究问题 / 二、研究方法 / 三、研究结果（以上预置写死）+ 四、结论与讨论（改写自学生与 AI 的对话，**整章按手写体渲染**，见 `src/index.css` 的 `.note-hand-block`）；**「给 Agent 的指令」与「附录」永不展示**（`notes-page.ts` 渲染前兜底切掉）。发布流程（教师说「**发布笔记**」→ 写 `reports/research-note-{N}.md`，并只把报告正文写入 `src/data/research-notes.json` 的 `markdown` / `published`）见 `reports/README.md`。
 - `GET /note-log/{1|2|3}`：返回 `note-logs/note-{x}.json`（学生对话原文，供外部批分引擎拉取），未生成则 404；本站不写入该目录，结构见 `note-logs/README.md`。
-- 研究笔记 1、2 的结构约束与术语规范（不押注；方法只有一个——按准确率挑参数组合，**准确率打平时取更简单的模型，即奥卡姆剃刀**；第三章研究数据预填；术语用 `max_depth` / `min_samples_leaf`、叶节点、特征、基线、混淆矩阵等规范名，`depth` / `min-leaf` 只是 Tab 05 面板简称）见 `reports/README.md`；笔记 2 的挑战题 Q4 最多 4 轮收束。
+- 研究笔记 1、2 的结构约束与术语规范（**先押注后给数**：押注之前不报任何数字、Agent **不替学生押**；方法只有一个——按准确率挑参数组合，**准确率打平时取更简单的模型，即奥卡姆剃刀**；第三章研究数据预填；术语用 `max_depth` / `min_samples_leaf`、叶节点、特征、基线、混淆矩阵等规范名，`depth` / `min-leaf` 只是 Tab 05 面板简称）见 `reports/README.md`；笔记 2 的挑战题 Q4 最多 4 轮收束。
 - 特征两行选择器（特征1 必选 / 特征2 可选且不可重复）由 `src/components/feature-picker.ts` 统一提供，tab3、tab4 共用。
 
 ## 预计算模型说明（初步分类页）
