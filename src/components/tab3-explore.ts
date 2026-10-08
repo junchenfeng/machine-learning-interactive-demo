@@ -100,7 +100,7 @@ export function renderExplore(container: HTMLElement): ExploreTab {
     <div class="card fade-up mt-6 p-5 md:p-6">
       <div class="mb-3.5 flex flex-wrap items-center justify-between gap-2">
         <h3 class="text-[15px] font-black">选择要对比的身体特征</h3>
-        <span class="text-xs text-mist">最多同时选 2 个：选 1 个按物种分行，选 2 个画成散点图</span>
+        <span class="text-xs text-mist">最多同时选 2 个：选 1 个按类别分行，选 2 个画成散点图</span>
       </div>
       <div id="feature-chips" class="grid grid-cols-2 gap-2.5 md:grid-cols-4"></div>
     </div>
@@ -140,7 +140,7 @@ export function renderExplore(container: HTMLElement): ExploreTab {
     }
     return two
       ? '先按形状找到同一种企鹅，再比较颜色：同一物种里，粉色（母）和深蓝（公）在哪些特征上错开？哪个物种的公母最好分？'
-      : '每行都混着三种形状（= 三种企鹅）。在同一行里，粉色点（母）和深蓝点（公）容易分开吗？记住这比区分物种更难。';
+      : '每一行代表一种性别（上公下母），行里混着三种形状（= 三种企鹅）。看看哪种特征上两行点堆"分得最开"？记住这比区分物种更难。';
   }
 
   function updateQuestions(): void {

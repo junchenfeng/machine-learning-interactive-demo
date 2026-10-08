@@ -88,6 +88,11 @@ function fullName(mode: ExploreMode, ci: 0 | 1): string {
   return ci === 0 ? '母企鹅' : '公企鹅';
 }
 
+/** 当前研究问题要分开的两类（连称） */
+function pairName(mode: ExploreMode): string {
+  return mode === 'species' ? '阿德利企鹅和帽带企鹅' : '母企鹅和公企鹅';
+}
+
 /** 分界线线段：b + w1*x + w2*y = 0.5，裁剪到数据范围（扩 12%）内；不相交返回 null */
 function olsSegment(
   model: OlsModel,
@@ -402,12 +407,12 @@ export function renderClassify(container: HTMLElement): ClassifyTab {
       const dec = Math.max(meta?.decimals ?? 0, 1);
       const cutoffText = m.cutoff.toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec });
       if (m.leftClass === m.rightClass) {
-        return `用「${meta?.label}」分不开这两种企鹅：无论从哪里切，所有企鹅都被判成${fullName(state.mode, m.leftClass)}。换个特征试试，比如嘴的长度。`;
+        return `用「${meta?.label}」分不开${pairName(state.mode)}：无论从哪里切，所有企鹅都被判成${fullName(state.mode, m.leftClass)}。换个特征试试，比如嘴的长度。`;
       }
       return `橙色虚线是电脑找到的最佳分界线：${meta?.label} ≤ ${cutoffText} ${meta?.unit ?? ''} 判成${fullName(state.mode, m.leftClass)}，超过判成${fullName(state.mode, m.rightClass)}。红圈是被分错的企鹅——对照右边红格的数字数一数。`;
     }
     if (!cur.hasLine) {
-      return `这两个特征分不开：直线把所有企鹅都判成了${fullName(state.mode, 0)}。试试「嘴的长度 + 嘴的厚度」，看看红圈会不会变少。`;
+      return `这两个特征分不开${pairName(state.mode)}：直线把所有企鹅都判成了${fullName(state.mode, 0)}。试试「嘴的长度 + 嘴的厚度」，看看红圈会不会变少。`;
     }
     return `橙色虚线是电脑根据两个特征画出的分界线，线的一侧判成${fullName(state.mode, 0)}、另一侧判成${fullName(state.mode, 1)}。鼠标点开红圈企鹅，看看它们错在哪里——是不是正好长在分界线附近？`;
   }

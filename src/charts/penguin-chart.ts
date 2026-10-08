@@ -191,7 +191,7 @@ export class ExploreChart {
     const xMeta = f0 ?? FEATURES[0];
 
     const series: (ScatterSeriesOption | LineSeriesOption)[] = groups.map((g, gi) => {
-      const data = buildSeriesData(g.rows, features, categories, is1D, misSet ?? null).map((d) => {
+      const data = buildSeriesData(g.rows, features, rowOf, is1D, misSet ?? null).map((d) => {
         const point: ChartDatum & Record<string, unknown> = {
           value: d.value,
           species: d.species,
