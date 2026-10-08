@@ -1,21 +1,141 @@
+@import url('https://fonts.googleapis.cn/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --ink: #12324f;
+  --mist: #5a7590;
+  --ice-line: #d8e7f2;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: #f0f7fc;
+  color: var(--ink);
+  font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 极光 / 冰面氛围装饰（不参与交互） */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(640px 300px at 88% -60px, rgba(31, 169, 201, 0.16), transparent 70%),
+    radial-gradient(520px 260px at 4% -80px, rgba(249, 115, 22, 0.07), transparent 70%),
+    radial-gradient(900px 420px at 50% 118%, rgba(22, 74, 115, 0.06), transparent 72%);
+}
+
+#app {
+  position: relative;
+  z-index: 1;
+}
+
+/* ---- 复用组件样式 ---- */
+.card {
+  background: #fff;
+  border: 1px solid var(--ice-line);
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(18, 50, 79, 0.06);
+  transition:
+    transform 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.2s;
+}
+
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(18, 50, 79, 0.12);
+  border-color: #93c3de;
+}
+
+.mono-num {
+  font-family: ui-monospace, 'SF Mono', 'Cascadia Code', Consolas, Menlo, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.fade-up {
+  animation: fadeUp 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.delay-1 { animation-delay: 0.06s; }
+.delay-2 { animation-delay: 0.12s; }
+.delay-3 { animation-delay: 0.18s; }
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* 统计表 */
+.stat-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 14px;
+}
+
+.stat-table th,
+.stat-table td {
+  padding: 10px 14px;
+  text-align: center;
+  border-bottom: 1px solid #e8f1f8;
+  white-space: nowrap;
+}
+
+.stat-table thead th {
+  background: #f0f7fc;
+  color: #164a73;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.stat-table tbody tr:hover td {
+  background: #f7fbfe;
+}
+
+.stat-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* 图例条 */
+.legend-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 22px;
+  font-size: 14px;
+  color: var(--ink);
+}
+
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.legend-divider {
+  width: 1px;
+  height: 18px;
+  background: var(--ice-line);
+}
+
+/* 特征芯片禁用态 */
+.chip-disabled {
+  opacity: 0.45;
+  cursor: not-allowed !important;
 }
