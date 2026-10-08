@@ -1,6 +1,6 @@
 // ABOUTME: Tab4 初步分类：复用探索分析布局，左散点图（含分界线与误判红圈）+ 右准确率/混淆矩阵
 // 全部参数来自预计算（scripts/precompute-classifiers.mjs），页面只查表渲染；教学上不出现任何算法名词
-import { FEATURES, SPECIES_META, classifySexRows, classifySpeciesRows } from '../data/dataset';
+import { FEATURES, SPECIES_META, SEX_META, classifySexRows, classifySpeciesRows } from '../data/dataset';
 import modelsJson from '../data/classifier-models.json';
 import { ExploreChart, legendHTML, symbolSvg } from '../charts/penguin-chart';
 import type { DecisionLine, ExploreMode } from '../charts/penguin-chart';
@@ -186,8 +186,8 @@ export function renderClassify(container: HTMLElement): ClassifyTab {
         'sex',
         '问题二 · 用一条线分开公企鹅和母企鹅',
         '同种企鹅公母差别不大，三种企鹅混在一起分。这条线还能分对多少？',
-        `<span class="flex items-center gap-0.5">${symbolSvg('circle', '#16A34A', 15)}${symbolSvg('circle', '#2F5D8A', 15)}</span>`,
-        '三种企鹅一起分',
+        `<span class="flex items-center gap-0.5">${symbolSvg('triangle', SEX_META.female.color, 15)}${symbolSvg('circle', SEX_META.male.color, 15)}</span>`,
+        '绿三角 = 母 · 蓝圆 = 公',
       )}
     </div>
 

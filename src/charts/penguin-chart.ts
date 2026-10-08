@@ -82,18 +82,14 @@ export function legendHTML(mode: ExploreMode): string {
     ].join('');
   }
   return [
-    item('circle', SEX_META.female.color, '母企鹅'),
-    item('circle', SEX_META.male.color, '公企鹅'),
-    '<span class="legend-divider"></span>',
-    item('circle', '#9AA7B4', '圆点 = Adelie'),
-    item('triangle', '#9AA7B4', '三角 = Chinstrap'),
-    item('rect', '#9AA7B4', '方块 = Gentoo'),
+    item('triangle', SEX_META.female.color, '母企鹅（绿三角）'),
+    item('circle', SEX_META.male.color, '公企鹅（蓝圆）'),
   ].join('');
 }
 
 interface GroupSpec {
   color: string;
-  symbol: string | null; // null 表示逐点按物种设置
+  symbol: string; // 每张图最多两个系列：蓝圆 = 第 1 类，绿三角 = 第 2 类
   rows: PenguinRecord[];
 }
 
@@ -157,7 +153,8 @@ export class ExploreChart {
 
     let groups: GroupSpec[];
     // 单特征图的类别轴 = 当前研究问题的目标类别：
-    // 区分企鹅 → 物种两行；区分公母 → 母/公两行（形状仍按物种区分）
+    // 区分企鹅 → 物种两行；区分公母 → 母/公两行。
+    // 性别模式不按物种混编形状：每张图只有两个系列（母 = 绿三角，公 = 蓝圆）
     let categories: string[] = [];
     let rowOf: (r: PenguinRecord) => number;
 
@@ -176,8 +173,8 @@ export class ExploreChart {
         (r) => r.sex !== null && features.every((k) => getFeatureValue(r, k) !== null),
       );
       groups = [
-        { color: SEX_META.female.color, symbol: null, rows: rows.filter((r) => r.sex === 'female') },
-        { color: SEX_META.male.color, symbol: null, rows: rows.filter((r) => r.sex === 'male') },
+        { color: SEX_META.female.color, symbol: 'triangle', rows: rows.filter((r) => r.sex === 'female') },
+        { color: SEX_META.male.color, symbol: 'circle', rows: rows.filter((r) => r.sex === 'male') },
       ];
       if (is1D) {
         categories = ['母', '公'];
@@ -198,9 +195,6 @@ export class ExploreChart {
           sex: d.sex,
           mis: d.mis,
         };
-        if (g.symbol === null) {
-          point.symbol = SPECIES_META[d.species].symbol;
-        }
         // 被分错的企鹅：加粗红描边（与混淆矩阵红格对应）
         if (d.mis) {
           point.itemStyle = { color: g.color, borderColor: '#E11D48', borderWidth: 2.6, opacity: 0.95 };

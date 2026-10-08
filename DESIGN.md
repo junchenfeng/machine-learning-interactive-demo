@@ -21,7 +21,7 @@
   - Adelie #3D6FB4（圆点 circle）
   - Chinstrap #16A34A（绿色三角 triangle；不用橙色，避免与误判红混淆）
   - Gentoo #7FA53C（方块 rect）
-- 性别规范色（研究问题二）：female #16A34A（绿）、male #2F5D8A（深海蓝）；性别模式下散点颜色按性别、形状仍按物种，Chinstrap 母企鹅即"绿色三角"
+- 性别规范编码（研究问题二）：每张图只有两个系列，不按物种混编形状——母 = 绿色三角（female #16A34A）、公 = 蓝色圆点（male #2F5D8A）；tooltip 仍可查看物种
 
 ### 字体
 - 中文正文：Noto Sans SC（fonts.googleapis.cn 引入），回退系统黑体

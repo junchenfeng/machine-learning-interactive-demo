@@ -1,5 +1,5 @@
 // ABOUTME: Tab3 探索分析：两个研究问题 + 特征选择（最多 2 个）+ 预设散点图（仅训练数据）
-import { FEATURES, SPECIES_META, trainRecords, data } from '../data/dataset';
+import { FEATURES, SPECIES_META, SEX_META, trainRecords, data } from '../data/dataset';
 import { ExploreChart, legendHTML, symbolSvg } from '../charts/penguin-chart';
 import type { ExploreMode } from '../charts/penguin-chart';
 import type { FeatureKey } from '../data/types';
@@ -90,9 +90,9 @@ export function renderExplore(container: HTMLElement): ExploreTab {
       ${questionCardHtml(
         'sex',
         '问题二 · 区分公企鹅和母企鹅',
-        '同一种企鹅里，公的和母的身材差别不大。颜色代表公母、形状代表物种，看看能否分得开？',
-        `<span class="flex items-center gap-0.5">${symbolSvg('circle', '#16A34A', 15)}${symbolSvg('circle', '#2F5D8A', 15)}</span>`,
-        '颜色 = 公母 · 形状 = 物种',
+        '同一种企鹅里，公的和母的身材差别不大。三种企鹅混在一起，你能一眼分出它们吗？',
+        `<span class="flex items-center gap-0.5">${symbolSvg('triangle', SEX_META.female.color, 15)}${symbolSvg('circle', SEX_META.male.color, 15)}</span>`,
+        '绿三角 = 母 · 蓝圆 = 公',
       )}
     </div>
 
@@ -139,8 +139,8 @@ export function renderExplore(container: HTMLElement): ExploreTab {
         : '每一行代表一种企鹅。看看哪种特征上两行点堆"分得最开"？再把它保留，加选第二个特征试试。';
     }
     return two
-      ? '先按形状找到同一种企鹅，再比较颜色：同一物种里，粉色（母）和深蓝（公）在哪些特征上错开？哪个物种的公母最好分？'
-      : '每一行代表一种性别（上公下母），行里混着三种形状（= 三种企鹅）。看看哪种特征上两行点堆"分得最开"？记住这比区分物种更难。';
+      ? '同一物种里，蓝色圆点（公）和绿色三角（母）在哪些特征上错开？哪个物种的公母最好分？'
+      : '每一行代表一种性别（上公下母）：绿三角是母、蓝圆是公。看看哪种特征上两行点堆"分得最开"？记住这比区分物种更难。';
   }
 
   function updateQuestions(): void {
