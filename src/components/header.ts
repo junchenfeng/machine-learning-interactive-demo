@@ -108,6 +108,14 @@ export function renderShell(root: HTMLElement): void {
             <span>${t.label}</span>
           </button>
         `).join('')}
+        <a href="/notes.html"
+          class="ml-auto hidden shrink-0 items-center gap-2 rounded-xl border border-beak/40 bg-beak-soft px-3.5 py-2.5 text-sm font-black text-beak-dark transition-all hover:-translate-y-0.5 hover:bg-beak hover:text-white md:inline-flex">
+          <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" aria-hidden="true">
+            <path d="M7 4h7l4 4v12H7z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+            <path d="M9.6 12.5h5M9.6 16h3.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+          研究笔记
+        </a>
       </div>
     </nav>
 

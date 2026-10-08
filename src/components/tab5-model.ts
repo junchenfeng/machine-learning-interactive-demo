@@ -97,8 +97,8 @@ function paramCardHtml(p: ModelParams): string {
         <div>
           <div class="mb-2 text-xs font-bold text-polar-700">每片叶子最少几只企鹅（min-leaf node）</div>
           <div class="flex gap-2.5">
-            ${paramButton('leaf', 60, 'min-leaf = 60', '规则更简单', p.minLeaf === 60)}
             ${paramButton('leaf', 10, 'min-leaf = 10', '规则更细', p.minLeaf === 10)}
+            ${paramButton('leaf', 60, 'min-leaf = 60', '规则更简单', p.minLeaf === 60)}
           </div>
         </div>
       </div>

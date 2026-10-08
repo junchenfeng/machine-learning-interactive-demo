@@ -1,0 +1,259 @@
+{
+  "meta": {
+    "source": "Palmer Penguins LTER（三种企鹅，只要性别有记录）",
+    "task": "猜公母：y=0 母 / y=1 公",
+    "train": {
+      "years": [
+        2007,
+        2008
+      ],
+      "n": 216,
+      "male": 109,
+      "female": 107
+    },
+    "valid": {
+      "years": [
+        2009
+      ],
+      "n": 117,
+      "male": 59,
+      "female": 58
+    },
+    "baselineTrain": 50.5,
+    "baselineValid": 50.4,
+    "features": [
+      "嘴的长度（毫米）",
+      "嘴的厚度（毫米）",
+      "翅膀长度（毫米）",
+      "体重（克）"
+    ],
+    "seed": 42,
+    "seedWarning": "随机森林对种子敏感：换种子验证集会落在 84.6%–88.9%。课堂一律用本文件数字。",
+    "onePenguin": 0.9
+  },
+  "tree": [
+    {
+      "depth": 1,
+      "leaf": 1,
+      "nLeaves": 2,
+      "train": 72.7,
+      "valid": 71.8,
+      "trainCorrect": 157,
+      "validCorrect": 84,
+      "used": [
+        "体重"
+      ]
+    },
+    {
+      "depth": 1,
+      "leaf": 20,
+      "nLeaves": 2,
+      "train": 72.7,
+      "valid": 71.8,
+      "trainCorrect": 157,
+      "validCorrect": 84,
+      "used": [
+        "体重"
+      ]
+    },
+    {
+      "depth": 2,
+      "leaf": 1,
+      "nLeaves": 4,
+      "train": 88.0,
+      "valid": 88.0,
+      "trainCorrect": 190,
+      "validCorrect": 103,
+      "used": [
+        "体重",
+        "嘴厚"
+      ]
+    },
+    {
+      "depth": 2,
+      "leaf": 20,
+      "nLeaves": 4,
+      "train": 88.0,
+      "valid": 88.0,
+      "trainCorrect": 190,
+      "validCorrect": 103,
+      "used": [
+        "体重",
+        "嘴厚"
+      ]
+    },
+    {
+      "depth": 3,
+      "leaf": 1,
+      "nLeaves": 8,
+      "train": 93.1,
+      "valid": 88.0,
+      "trainCorrect": 201,
+      "validCorrect": 103,
+      "used": [
+        "体重",
+        "嘴厚",
+        "嘴长"
+      ]
+    },
+    {
+      "depth": 3,
+      "leaf": 20,
+      "nLeaves": 7,
+      "train": 88.0,
+      "valid": 88.0,
+      "trainCorrect": 190,
+      "validCorrect": 103,
+      "used": [
+        "体重",
+        "嘴厚",
+        "嘴长"
+      ]
+    },
+    {
+      "depth": 5,
+      "leaf": 1,
+      "nLeaves": 18,
+      "train": 96.3,
+      "valid": 84.6,
+      "trainCorrect": 208,
+      "validCorrect": 99,
+      "used": [
+        "体重",
+        "嘴厚",
+        "嘴长",
+        "鳍长"
+      ]
+    },
+    {
+      "depth": 5,
+      "leaf": 20,
+      "nLeaves": 9,
+      "train": 88.0,
+      "valid": 88.0,
+      "trainCorrect": 190,
+      "validCorrect": 103,
+      "used": [
+        "体重",
+        "嘴厚",
+        "嘴长"
+      ]
+    },
+    {
+      "depth": "不限",
+      "leaf": 1,
+      "nLeaves": 27,
+      "train": 100.0,
+      "valid": 82.9,
+      "trainCorrect": 216,
+      "validCorrect": 97,
+      "used": [
+        "体重",
+        "嘴厚",
+        "嘴长",
+        "鳍长"
+      ]
+    },
+    {
+      "depth": "不限",
+      "leaf": 20,
+      "nLeaves": 9,
+      "train": 88.0,
+      "valid": 88.0,
+      "trainCorrect": 190,
+      "validCorrect": 103,
+      "used": [
+        "体重",
+        "嘴厚",
+        "嘴长"
+      ]
+    }
+  ],
+  "logit": [
+    {
+      "C": 0.01,
+      "train": 84.7,
+      "valid": 79.5,
+      "trainCorrect": 183,
+      "validCorrect": 93
+    },
+    {
+      "C": 0.1,
+      "train": 91.2,
+      "valid": 85.5,
+      "trainCorrect": 197,
+      "validCorrect": 100
+    },
+    {
+      "C": 1,
+      "train": 92.1,
+      "valid": 87.2,
+      "trainCorrect": 199,
+      "validCorrect": 102
+    },
+    {
+      "C": 10,
+      "train": 92.6,
+      "valid": 87.2,
+      "trainCorrect": 200,
+      "validCorrect": 102
+    },
+    {
+      "C": 100,
+      "train": 92.6,
+      "valid": 85.5,
+      "trainCorrect": 200,
+      "validCorrect": 100
+    }
+  ],
+  "forest": [
+    {
+      "nTrees": 10,
+      "depth": 1,
+      "train": 74.5,
+      "valid": 70.9,
+      "trainCorrect": 161,
+      "validCorrect": 83
+    },
+    {
+      "nTrees": 10,
+      "depth": 3,
+      "train": 92.1,
+      "valid": 82.1,
+      "trainCorrect": 199,
+      "validCorrect": 96
+    },
+    {
+      "nTrees": 10,
+      "depth": "不限",
+      "train": 99.1,
+      "valid": 83.8,
+      "trainCorrect": 214,
+      "validCorrect": 98
+    },
+    {
+      "nTrees": 100,
+      "depth": 1,
+      "train": 84.7,
+      "valid": 82.9,
+      "trainCorrect": 183,
+      "validCorrect": 97
+    },
+    {
+      "nTrees": 100,
+      "depth": 3,
+      "train": 93.5,
+      "valid": 87.2,
+      "trainCorrect": 202,
+      "validCorrect": 102
+    },
+    {
+      "nTrees": 100,
+      "depth": "不限",
+      "train": 100.0,
+      "valid": 86.3,
+      "trainCorrect": 216,
+      "validCorrect": 101
+    }
+  ]
+}

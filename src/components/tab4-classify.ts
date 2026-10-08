@@ -3,6 +3,7 @@
 import { FEATURES, SPECIES_META, SEX_META, classifySexRows, classifySpeciesRows } from '../data/dataset';
 import modelsJson from '../data/classifier-models.json';
 import { ExploreChart, legendHTML, symbolSvg } from '../charts/penguin-chart';
+import { featureKeys, featureRowHtml, handleFeatureClick } from './feature-picker';
 import type { DecisionLine, ExploreMode } from '../charts/penguin-chart';
 import type { FeatureKey, PenguinRecord } from '../data/types';
 
@@ -48,7 +49,10 @@ const TASK_ROWS: Record<ExploreMode, PenguinRecord[]> = {
 
 interface ClassifyState {
   mode: ExploreMode;
-  selected: FeatureKey[];
+  /** 特征1：必选，radio 语义，当作横轴 */
+  f1: FeatureKey;
+  /** 特征2：可选，当作纵轴；不选则只做"一刀切" */
+  f2: FeatureKey | null;
   chart: ExploreChart | null;
 }
 
@@ -158,15 +162,15 @@ function olsSegment(
 }
 
 export function renderClassify(container: HTMLElement): ClassifyTab {
-  const state: ClassifyState = { mode: 'species', selected: ['billLength'], chart: null };
+  const state: ClassifyState = { mode: 'species', f1: 'billLength', f2: null, chart: null };
 
   container.innerHTML = `
     <div class="fade-up mb-7 flex items-start gap-4">
       <span class="mono-num flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-polar-800 text-sm font-bold text-white shadow-card">04</span>
       <div>
-        <h2 class="text-xl font-black md:text-2xl">初步分类：让电脑画一条分界线</h2>
+        <h2 class="text-xl font-black md:text-2xl">初步分类：让 AI 画一条分界线</h2>
         <p class="mt-1 max-w-3xl text-sm leading-relaxed text-mist">
-          上一页我们用眼睛找规律，这一页换成电脑来画：选 <b class="text-ink">1 个特征</b>，它自动找"一刀切"的位置；
+          上一页我们用眼睛找规律，这一页换成 AI 来画：选 <b class="text-ink">1 个特征</b>，它自动找"一刀切"的位置；
           选 <b class="text-ink">2 个特征</b>，它自动画一条直线。画完马上汇报——<b class="text-ink">判对了多少</b>、
           <b class="text-ink">谁被判错了</b>。
         </p>
@@ -178,7 +182,7 @@ export function renderClassify(container: HTMLElement): ClassifyTab {
       ${questionCardHtml(
         'species',
         '问题一 · 用一条线分开 Adelie 和 Chinstrap',
-        '上一页我们用眼睛找规律；现在让电脑自动画一条分界线，数数它分对了多少。',
+        '上一页我们用眼睛找规律；现在让 AI 自动画一条分界线，数数它分对了多少。',
         `<span class="flex items-center gap-0.5">${symbolSvg('circle', SPECIES_META.Adelie.color, 15)}${symbolSvg('triangle', SPECIES_META.Chinstrap.color, 15)}</span>`,
         '只用这两种企鹅',
       )}
@@ -193,11 +197,26 @@ export function renderClassify(container: HTMLElement): ClassifyTab {
 
     <!-- 特征选择 -->
     <div class="card fade-up mt-6 p-5 md:p-6">
-      <div class="mb-3.5 flex flex-wrap items-center justify-between gap-2">
+      <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
         <h3 class="text-[15px] font-black">用哪些特征来分？</h3>
-        <span class="text-xs text-mist">最多同时选 2 个：选 1 个自动找"一刀切"，选 2 个自动画直线</span>
+        <span class="text-xs text-mist">特征1 必选、特征2 可不选：只选特征1 自动找"一刀切"，加上特征2 自动画直线</span>
       </div>
-      <div id="feature-chips" class="grid grid-cols-2 gap-2.5 md:grid-cols-4"></div>
+      <div class="flex flex-col gap-4">
+        <div>
+          <div class="mb-2 flex flex-wrap items-center gap-2">
+            <span class="rounded-md bg-beak-soft px-2 py-0.5 text-[11px] font-black text-beak-dark">特征1 · 必选</span>
+            <span class="text-[11.5px] text-mist">当作横轴；只选它时，AI 会在这条轴上找"一刀切"的位置</span>
+          </div>
+          <div id="feature-row-1" class="grid grid-cols-2 gap-2.5 md:grid-cols-4"></div>
+        </div>
+        <div>
+          <div class="mb-2 flex flex-wrap items-center gap-2">
+            <span class="rounded-md bg-polar-100 px-2 py-0.5 text-[11px] font-black text-polar-700">特征2 · 可选</span>
+            <span class="text-[11.5px] text-mist">当作纵轴；不选就只有"一刀切"，注意不能和特征1 相同</span>
+          </div>
+          <div id="feature-row-2" class="grid grid-cols-2 gap-2.5 md:grid-cols-4"></div>
+        </div>
+      </div>
     </div>
 
     <!-- 主体：左图 + 右指标 -->
@@ -208,7 +227,7 @@ export function renderClassify(container: HTMLElement): ClassifyTab {
           <div id="classify-chart" class="w-full" style="height:380px"></div>
           <p class="mt-3 text-xs leading-relaxed text-mist">
             图中每个点是一只企鹅（单特征图做了轻微上下抖动，便于看到重叠的数据）。
-            <span class="font-bold text-beak-dark">橙色虚线 = 电脑画的分界线</span>；
+            <span class="font-bold text-beak-dark">橙色虚线 = AI 画的分界线</span>；
             <span class="font-bold" style="color:${MIS_COLOR}">红圈 = 被分错的企鹅</span>。数据：训练集（2007-2008）。
           </p>
         </div>
@@ -230,7 +249,8 @@ export function renderClassify(container: HTMLElement): ClassifyTab {
   const chartEl = container.querySelector<HTMLElement>('#classify-chart');
   const legendEl = container.querySelector<HTMLElement>('#classify-legend');
   const hintEl = container.querySelector<HTMLElement>('#classify-hint');
-  const chipsEl = container.querySelector<HTMLElement>('#feature-chips');
+  const row1El = container.querySelector<HTMLElement>('#feature-row-1');
+  const row2El = container.querySelector<HTMLElement>('#feature-row-2');
   const ruleEl = container.querySelector<HTMLElement>('#model-rule');
   const accEl = container.querySelector<HTMLElement>('#accuracy-box');
   const confusionEl = container.querySelector<HTMLElement>('#confusion-box');
@@ -251,16 +271,20 @@ export function renderClassify(container: HTMLElement): ClassifyTab {
         segment: { x1: number; y1: number; x2: number; y2: number } | null;
       } {
     const task = MODELS[state.mode];
-    if (state.selected.length === 1) {
-      const feature = state.selected[0];
+    if (state.f2 === null) {
+      const feature = state.f1;
       return { kind: 'tree', model: task.tree[feature], feature };
     }
-    const sorted = [...state.selected].sort(
-      (a, b) => FEATURE_ORDER.indexOf(a) - FEATURE_ORDER.indexOf(b),
-    );
-    const model = task.ols[`${sorted[0]}+${sorted[1]}`];
-    const segment = olsSegment(model, sorted[0], sorted[1], TASK_ROWS[state.mode]);
-    return { kind: 'ols', model, fx: sorted[0], fy: sorted[1], hasLine: segment !== null, segment };
+    // 查表 key 必须用预计算脚本的 canonical 顺序（FEATURES 顺序）；
+    // 但分界线要画在实际坐标轴上（特征1 = x、特征2 = y），
+    // 因此显示顺序与 canonical 相反时交换 w 的两个分量，避免线与散点错位。
+    const fx = state.f1;
+    const fy = state.f2;
+    const canonical = FEATURE_ORDER.indexOf(fx) < FEATURE_ORDER.indexOf(fy) ? [fx, fy] : [fy, fx];
+    const raw = task.ols[`${canonical[0]}+${canonical[1]}`];
+    const model: OlsModel = canonical[0] === fx ? raw : { ...raw, w: [raw.w[1], raw.w[0]] };
+    const segment = olsSegment(model, fx, fy, TASK_ROWS[state.mode]);
+    return { kind: 'ols', model, fx, fy, hasLine: segment !== null, segment };
   }
 
   function updateQuestions(): void {
@@ -280,22 +304,8 @@ export function renderClassify(container: HTMLElement): ClassifyTab {
   }
 
   function updateChips(): void {
-    if (!chipsEl) return;
-    const full = state.selected.length >= 2;
-    chipsEl.innerHTML = FEATURES.map((f) => {
-      const selected = state.selected.includes(f.key);
-      const disabled = !selected && full;
-      const base = 'chip-btn flex flex-col items-start gap-1 rounded-xl border-2 px-3.5 py-2.5 text-left transition-all';
-      const look = selected
-        ? ' border-beak bg-beak text-white shadow-card-hover'
-        : ' border-polar-200 bg-white text-ink hover:border-polar-400';
-      return `
-        <button type="button" data-feature="${f.key}" ${disabled ? 'disabled' : ''}
-          class="${base}${look}${disabled ? ' chip-disabled' : ''}" aria-pressed="${selected}">
-          <span class="text-sm font-black">${f.label}</span>
-          <span class="mono-num text-[10.5px] leading-tight ${selected ? 'text-white/75' : 'text-mist'}">${f.field} · ${f.unit}</span>
-        </button>`;
-    }).join('');
+    if (row1El) row1El.innerHTML = featureRowHtml('data-feature-1', state);
+    if (row2El) row2El.innerHTML = featureRowHtml('data-feature-2', state);
   }
 
   function accuracyColor(acc: number): { bar: string; text: string } {
@@ -308,7 +318,7 @@ export function renderClassify(container: HTMLElement): ClassifyTab {
     if (!ruleEl) return;
     const cur = currentModel();
     const fMeta = (key: FeatureKey) => FEATURES.find((f) => f.key === key);
-    let title = '电脑的规则';
+    const title = 'AI 的规则';
     let body = '';
     if (cur.kind === 'tree') {
       const meta = fMeta(cur.feature);
@@ -322,7 +332,7 @@ export function renderClassify(container: HTMLElement): ClassifyTab {
         body = `
           <p class="mono-num text-[13px] leading-relaxed text-ink">${meta?.label} ≤ ${cutoffText} ${meta?.unit ?? ''} → ${fullName(state.mode, m.leftClass)}</p>
           <p class="mono-num text-[13px] leading-relaxed text-ink">${meta?.label} ＞ ${cutoffText} ${meta?.unit ?? ''} → ${fullName(state.mode, m.rightClass)}</p>
-          <p class="mt-1.5 text-[12.5px] leading-relaxed text-mist">电脑试遍了所有能"一刀切"的位置，挑出分得最开的那一个。</p>`;
+          <p class="mt-1.5 text-[12.5px] leading-relaxed text-mist">AI 试遍了所有能"一刀切"的位置，挑出分得最开的那一个。</p>`;
       }
     } else {
       const mx = fMeta(cur.fx);
@@ -333,7 +343,7 @@ export function renderClassify(container: HTMLElement): ClassifyTab {
           <p class="text-[13px] leading-relaxed text-ink">用 <b>${mx?.label ?? ''} + ${my?.label ?? ''}</b> 画出的直线，把所有企鹅都判成了 <b>${fullName(state.mode, 0)}</b>——这两个特征分不开。</p>`;
       } else {
         body = `
-          <p class="text-[13px] leading-relaxed text-ink">电脑根据 <b>${mx?.label ?? ''} + ${my?.label ?? ''}</b> 自动画一条直线：</p>
+          <p class="text-[13px] leading-relaxed text-ink">AI 根据 <b>${mx?.label ?? ''} + ${my?.label ?? ''}</b> 自动画一条直线：</p>
           <p class="mt-1 text-[13px] leading-relaxed text-ink">直线的一侧判成 <b>${fullName(state.mode, 0)}</b>，另一侧判成 <b>${fullName(state.mode, 1)}</b>。</p>`;
       }
       if (m.misIds.length > 0) {
@@ -409,17 +419,18 @@ export function renderClassify(container: HTMLElement): ClassifyTab {
       if (m.leftClass === m.rightClass) {
         return `用「${meta?.label}」分不开${pairName(state.mode)}：无论从哪里切，所有企鹅都被判成${fullName(state.mode, m.leftClass)}。换个特征试试，比如嘴的长度。`;
       }
-      return `橙色虚线是电脑找到的最佳分界线：${meta?.label} ≤ ${cutoffText} ${meta?.unit ?? ''} 判成${fullName(state.mode, m.leftClass)}，超过判成${fullName(state.mode, m.rightClass)}。红圈是被分错的企鹅——对照右边红格的数字数一数。`;
+      return `橙色虚线是 AI 找到的最佳分界线：${meta?.label} ≤ ${cutoffText} ${meta?.unit ?? ''} 判成${fullName(state.mode, m.leftClass)}，超过判成${fullName(state.mode, m.rightClass)}。红圈是被分错的企鹅——对照右边红格的数字数一数。`;
     }
     if (!cur.hasLine) {
       return `这两个特征分不开${pairName(state.mode)}：直线把所有企鹅都判成了${fullName(state.mode, 0)}。试试「嘴的长度 + 嘴的厚度」，看看红圈会不会变少。`;
     }
-    return `橙色虚线是电脑根据两个特征画出的分界线，线的一侧判成${fullName(state.mode, 0)}、另一侧判成${fullName(state.mode, 1)}。鼠标点开红圈企鹅，看看它们错在哪里——是不是正好长在分界线附近？`;
+    return `橙色虚线是 AI 根据两个特征画出的分界线，线的一侧判成${fullName(state.mode, 0)}、另一侧判成${fullName(state.mode, 1)}。鼠标点开红圈企鹅，看看它们错在哪里——是不是正好长在分界线附近？`;
   }
 
   function updateChart(): void {
     if (!chartEl) return;
-    const is1D = state.selected.length === 1;
+    const features = featureKeys(state);
+    const is1D = features.length === 1;
     chartEl.style.height = is1D ? '380px' : '460px';
     if (!state.chart) {
       state.chart = new ExploreChart(chartEl);
@@ -443,7 +454,7 @@ export function renderClassify(container: HTMLElement): ClassifyTab {
 
     state.chart.update({
       mode: state.mode,
-      features: state.selected,
+      features,
       records: rows,
       decisionLine,
       misSet,
@@ -471,17 +482,7 @@ export function renderClassify(container: HTMLElement): ClassifyTab {
       }
       return;
     }
-    const chipBtn = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-feature]');
-    if (chipBtn && !chipBtn.disabled) {
-      const key = chipBtn.dataset.feature as FeatureKey | undefined;
-      if (!key) return;
-      if (state.selected.includes(key)) {
-        if (state.selected.length > 1) state.selected = state.selected.filter((k) => k !== key);
-      } else if (state.selected.length < 2) {
-        state.selected = [...state.selected, key];
-      }
-      updateAll();
-    }
+    if (handleFeatureClick(e.target as HTMLElement, state)) updateAll();
   });
 
   updateAll();

@@ -1,0 +1,29 @@
+[
+  {
+    "id": 1,
+    "title": "研究笔记 1 · 区分两种企鹅",
+    "subtitle": "阿德利 vs 帽带 · 143 只 · 100% 训练 · L2 必做",
+    "level": "必做",
+    "source": "reports/research-note-1.md",
+    "published": false,
+    "markdown": ""
+  },
+  {
+    "id": 2,
+    "title": "研究笔记 2 · 区分公企鹅和母企鹅",
+    "subtitle": "三种企鹅一起分 · 216 只 · 100% 训练 · 选做",
+    "level": "选做",
+    "source": "reports/research-note-2.md",
+    "published": false,
+    "markdown": ""
+  },
+  {
+    "id": 3,
+    "title": "研究笔记 3 · 三站网格搜索",
+    "subtitle": "216 只练 / 117 只封存验证 · L3+L4",
+    "level": "进阶",
+    "source": "reports/research-note-3.md",
+    "published": false,
+    "markdown": ""
+  }
+]

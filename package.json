@@ -17,7 +17,8 @@
     "@supabase/supabase-js": "2.95.3",
     "dotenv": "^17.2.3",
     "echarts": "^6.1.0",
-    "express": "^4.21.2"
+    "express": "^4.21.2",
+    "marked": "^18.1.0"
   },
   "devDependencies": {
     "@types/express": "^5.0.0",

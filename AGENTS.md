@@ -19,20 +19,41 @@
 │   ├── routes/         # API 路由
 │   ├── server.ts       # Express 服务入口
 │   └── vite.ts         # Vite 中间件集成
+├── reports/            # 研究笔记（学生课后与 AI 对话完成的探究作业）
+│   ├── README.md       # 三份笔记的用法、设计约束与数字事实源
+│   ├── research-note-1.md  # Y = 物种（143 只，100% 训练）· L2 必做
+│   ├── research-note-2.md  # Y = 性别（216 只，100% 训练）· 选做
+│   ├── research-note-3.md  # Y = 性别（216 练 / 117 验证）+ 三站网格搜索 · L3+L4
+│   └── data/           # research-note-data.json / research-note-3-data.json（预计算，唯一数字事实源）
+├── note-logs/          # 学生对话 JSON（note-{1,2,3}.json，AI 写入、GET /note-log/{N} 只读，供外部批分）
+├── scripts/
+│   ├── generate_research_note_data.py    # 生成笔记 1、2 所需的数字
+│   ├── generate_research_note_3_data.py  # 生成笔记 3 的三站网格数字（含决策树/打分/森林）
+│   └── ...
 ├── public/             # 静态资源
 │   └── trees/          # sklearn 预生成决策树图（depth{1,2}-leaf{10,60}.png）
 ├── src/                # 前端源码
 │   ├── charts/         # ECharts 封装（penguin-chart.ts 含决策虚线能力）
-│   ├── components/     # Tab 页面：tab1-species / tab2-dataset / tab3-explore / tab4-classify / tab5-model、header
-│   ├── data/           # penguins.json 数据源、classifier-models.json / tree-models.json 预计算模型、dataset.ts、types.ts
+│   ├── components/     # Tab 页面：tab1-species / tab2-dataset / tab3-explore / tab4-classify / tab5-model、header、feature-picker
+│   ├── data/           # penguins.json 数据源、classifier-models.json / tree-models.json 预计算模型、research-notes.json、dataset.ts、types.ts
+│   ├── notes/          # 研究笔记独立页组件（notes-page.ts：笔记本 UI + 页签 + 未发布空态）
 │   ├── index.css       # 全局样式
-│   ├── index.ts        # 客户端入口
+│   ├── index.ts        # 主站入口
+│   ├── notes-main.ts   # 研究笔记页入口（/notes.html）
 │   └── main.ts         # 主逻辑
-├── index.html          # 入口 HTML
+├── index.html          # 主站入口 HTML
+├── notes.html          # 研究笔记独立页 HTML
 ├── package.json        # 项目依赖管理
 ├── tsconfig.json       # TypeScript 配置
-└── vite.config.ts      # Vite 配置
+└── vite.config.ts      # Vite 配置（多页构建：index.html + notes.html）
 ```
+
+## 研究笔记页与对话记录接口
+
+- `/notes.html`：独立于五个 Tab 的笔记本页面，内容源 `src/data/research-notes.json`，`published: false` 的页签显示空白占位。发布流程（教师说「**发布笔记**」→ 写 `reports/research-note-{N}.md` 并同时更新 `src/data/research-notes.json` 的 `markdown` / `published`）见 `reports/README.md`。
+- `GET /note-log/{1|2|3}`：返回 `note-logs/note-{x}.json`（学生对话原文，供外部批分引擎拉取），未生成则 404；本站不写入该目录，结构见 `note-logs/README.md`。
+- 研究笔记 1、2 的结构约束与术语规范（不押注；方法只有一个——按准确率挑参数组合，**准确率打平时取更简单的模型，即奥卡姆剃刀**；第三章研究数据预填；术语用 `max_depth` / `min_samples_leaf`、叶节点、特征、基线、混淆矩阵等规范名，`depth` / `min-leaf` 只是 Tab 05 面板简称）见 `reports/README.md`；笔记 2 的挑战题 Q4 最多 4 轮收束。
+- 特征两行选择器（特征1 必选 / 特征2 可选且不可重复）由 `src/components/feature-picker.ts` 统一提供，tab3、tab4 共用。
 
 ## 预计算模型说明（初步分类页）
 

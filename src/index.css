@@ -29,9 +29,9 @@ body::before {
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(640px 300px at 88% -60px, rgba(31, 169, 201, 0.16), transparent 70%),
-    radial-gradient(520px 260px at 4% -80px, rgba(249, 115, 22, 0.07), transparent 70%),
-    radial-gradient(900px 420px at 50% 118%, rgba(22, 74, 115, 0.06), transparent 72%);
+    radial-gradient(640px 300px at 88% -60px, rgb(31 169 201 / 16%), transparent 70%),
+    radial-gradient(520px 260px at 4% -80px, rgb(249 115 22 / 7%), transparent 70%),
+    radial-gradient(900px 420px at 50% 118%, rgb(22 74 115 / 6%), transparent 72%);
 }
 
 #app {
@@ -44,7 +44,7 @@ body::before {
   background: #fff;
   border: 1px solid var(--ice-line);
   border-radius: 16px;
-  box-shadow: 0 2px 8px rgba(18, 50, 79, 0.06);
+  box-shadow: 0 2px 8px rgb(18 50 79 / 6%);
   transition:
     transform 0.2s cubic-bezier(0.22, 1, 0.36, 1),
     box-shadow 0.2s cubic-bezier(0.22, 1, 0.36, 1),
@@ -53,7 +53,7 @@ body::before {
 
 .card-hover:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(18, 50, 79, 0.12);
+  box-shadow: 0 6px 20px rgb(18 50 79 / 12%);
   border-color: #93c3de;
 }
 
@@ -63,14 +63,14 @@ body::before {
 }
 
 .fade-up {
-  animation: fadeUp 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: fade-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .delay-1 { animation-delay: 0.06s; }
 .delay-2 { animation-delay: 0.12s; }
 .delay-3 { animation-delay: 0.18s; }
 
-@keyframes fadeUp {
+@keyframes fade-up {
   from {
     opacity: 0;
     transform: translateY(8px);
@@ -139,3 +139,173 @@ body::before {
   opacity: 0.45;
   cursor: not-allowed !important;
 }
+
+/* ---- 研究笔记页（/notes.html）：纸质笔记本 ---- */
+/* stylelint-disable no-descending-specificity -- .note-prose 是笔记页独立作用域，与主站 .stat-table 无交集，仅按可读顺序排列 */
+body.notes-body {
+  background-color: #f4efe2;
+}
+
+body.notes-body::before {
+  background:
+    radial-gradient(680px 320px at 90% -70px, rgb(249 115 22 / 12%), transparent 72%),
+    radial-gradient(560px 280px at 2% -90px, rgb(31 169 201 / 12%), transparent 72%),
+    radial-gradient(900px 420px at 50% 120%, rgb(22 74 115 / 7%), transparent 75%);
+}
+
+/* 米黄纸面 + 细横线 + 左侧装订线 */
+.paper-sheet {
+  background-color: #fdf9ef;
+  background-image:
+    linear-gradient(to right, rgb(224 122 95 / 30%) 0 1px, transparent 1px),
+    repeating-linear-gradient(to bottom, transparent 0 31px, rgb(31 169 201 / 12%) 31px 32px);
+  background-position: 58px 0, 0 10px;
+  background-repeat: no-repeat, repeat;
+  border: 1px solid #e6dcc4;
+  border-radius: 18px;
+  box-shadow:
+    0 20px 44px -22px rgb(18 50 79 / 35%),
+    0 2px 6px rgb(18 50 79 / 6%);
+}
+
+/* 装订打孔 */
+.paper-sheet::before {
+  content: '';
+  position: absolute;
+  left: 16px;
+  top: 36px;
+  bottom: 36px;
+  width: 14px;
+  border-radius: 7px;
+  background-image: radial-gradient(circle at 7px 7px, rgb(18 50 79 / 16%) 5.5px, transparent 6.5px);
+  background-size: 14px 46px;
+  background-repeat: repeat-y;
+  pointer-events: none;
+}
+
+/* Markdown 排版（marked 输出） */
+.note-prose {
+  font-size: 15px;
+  line-height: 1.95;
+  color: #2c3a47;
+  overflow-wrap: anywhere;
+}
+
+.note-prose > * + * {
+  margin-top: 0.9em;
+}
+
+.note-prose h1,
+.note-prose h2,
+.note-prose h3,
+.note-prose h4 {
+  color: var(--ink);
+  font-weight: 900;
+  line-height: 1.4;
+}
+
+.note-prose h1 { font-size: 23px; }
+.note-prose h2 {
+  font-size: 18.5px;
+  margin-top: 1.5em;
+  padding-bottom: 6px;
+  border-bottom: 1px dashed #ddd2b8;
+}
+.note-prose h3 {
+  font-size: 16px;
+  margin-top: 1.2em;
+}
+
+.note-prose h4 { font-size: 14.5px; }
+
+.note-prose strong {
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.note-prose ul,
+.note-prose ol {
+  padding-left: 1.5em;
+}
+
+.note-prose ul { list-style: disc; }
+.note-prose ol { list-style: decimal; }
+.note-prose li { margin: 0.25em 0; }
+.note-prose li::marker { color: #b9a97f; }
+
+.note-prose a {
+  color: #1785a5;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.note-prose blockquote {
+  padding: 8px 16px;
+  border-left: 3px solid var(--beak, #f97316);
+  background: rgb(249 115 22 / 6%);
+  border-radius: 0 12px 12px 0;
+  color: var(--mist);
+}
+
+.note-prose hr {
+  border: none;
+  border-top: 1px dashed #ddd2b8;
+  margin: 1.6em 0;
+}
+
+.note-prose code {
+  font-family: ui-monospace, 'SF Mono', 'Cascadia Code', Consolas, Menlo, monospace;
+  font-size: 13px;
+  background: #f2ead7;
+  border-radius: 6px;
+  padding: 1px 6px;
+}
+
+.note-prose pre {
+  background: #12324f;
+  color: #e8f1f8;
+  border-radius: 12px;
+  padding: 14px 16px;
+  overflow-x: auto;
+}
+
+.note-prose pre code {
+  background: transparent;
+  color: inherit;
+  padding: 0;
+}
+
+.note-prose img {
+  max-width: 100%;
+  border-radius: 12px;
+  border: 1px solid #e6dcc4;
+}
+
+.note-prose table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+  background: rgb(255 255 255 / 78%);
+}
+
+.note-prose th,
+.note-prose td {
+  padding: 8px 12px;
+  border: 1px solid #e4dac1;
+  text-align: left;
+  vertical-align: top;
+}
+
+.note-prose thead th {
+  background: #f4ecd9;
+  color: #164a73;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.note-prose tbody tr:nth-child(even) {
+  background: rgb(244 236 217 / 45%);
+}
+
+
+/* stylelint-enable no-descending-specificity */

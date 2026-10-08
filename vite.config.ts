@@ -1,6 +1,15 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
+  build: {
+    rollupOptions: {
+      input: {
+        // 主站五 Tab 单页 + 独立的研究笔记页
+        main: 'index.html',
+        notes: 'notes.html',
+      },
+    },
+  },
   server: {
     port: 5000,
     host: '0.0.0.0',

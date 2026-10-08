@@ -1,0 +1,384 @@
+{
+  "species": {
+    "meta": {
+      "source": "Palmer Penguins LTER · 2007-2008 · 仅 Adelie 与 Chinstrap",
+      "model": "sklearn DecisionTreeClassifier(criterion='gini', random_state=42)",
+      "trainRule": "100% 训练：143 只企鹅全部用来学规则，不做 train-test 划分",
+      "cmRule": "行 = 真实 · 列 = 判成",
+      "classes": [
+        "Adelie",
+        "Chinstrap"
+      ],
+      "classCn": [
+        "阿德利企鹅",
+        "帽带企鹅"
+      ],
+      "n": 143,
+      "nFirst": 99,
+      "nSecond": 44,
+      "baseline": 0.6923,
+      "features": [
+        "嘴的长度（毫米）",
+        "嘴的厚度（毫米）",
+        "翅膀长度（毫米）",
+        "体重（克）"
+      ]
+    },
+    "combos": {
+      "depth1-leaf10": {
+        "depth": 1,
+        "minLeaf": 10,
+        "n": 143,
+        "correct": 137,
+        "accuracy": 0.958,
+        "cm": [
+          [
+            97,
+            2
+          ],
+          [
+            4,
+            40
+          ]
+        ],
+        "pickedFeatures": [
+          "嘴的长度（毫米）"
+        ],
+        "rules": [
+          {
+            "if": "嘴的长度（毫米） ≤ 44.65",
+            "predict": "阿德利企鹅",
+            "samples": 101,
+            "nFirst": 97,
+            "nSecond": 4
+          },
+          {
+            "if": "嘴的长度（毫米） > 44.65",
+            "predict": "帽带企鹅",
+            "samples": 42,
+            "nFirst": 2,
+            "nSecond": 40
+          }
+        ]
+      },
+      "depth1-leaf60": {
+        "depth": 1,
+        "minLeaf": 60,
+        "n": 143,
+        "correct": 125,
+        "accuracy": 0.8741,
+        "cm": [
+          [
+            82,
+            17
+          ],
+          [
+            1,
+            43
+          ]
+        ],
+        "pickedFeatures": [
+          "嘴的长度（毫米）"
+        ],
+        "rules": [
+          {
+            "if": "嘴的长度（毫米） ≤ 41.20",
+            "predict": "阿德利企鹅",
+            "samples": 83,
+            "nFirst": 82,
+            "nSecond": 1
+          },
+          {
+            "if": "嘴的长度（毫米） > 41.20",
+            "predict": "帽带企鹅",
+            "samples": 60,
+            "nFirst": 17,
+            "nSecond": 43
+          }
+        ]
+      },
+      "depth2-leaf10": {
+        "depth": 2,
+        "minLeaf": 10,
+        "n": 143,
+        "correct": 137,
+        "accuracy": 0.958,
+        "cm": [
+          [
+            97,
+            2
+          ],
+          [
+            4,
+            40
+          ]
+        ],
+        "pickedFeatures": [
+          "嘴的长度（毫米）",
+          "体重（克）"
+        ],
+        "rules": [
+          {
+            "if": "嘴的长度（毫米） ≤ 42.15",
+            "predict": "阿德利企鹅",
+            "samples": 91,
+            "nFirst": 90,
+            "nSecond": 1
+          },
+          {
+            "if": "嘴的长度（毫米） ≤ 44.65 且 嘴的长度（毫米） > 42.15",
+            "predict": "阿德利企鹅",
+            "samples": 10,
+            "nFirst": 7,
+            "nSecond": 3
+          },
+          {
+            "if": "嘴的长度（毫米） > 44.65 且 体重（克） ≤ 4075.00",
+            "predict": "帽带企鹅",
+            "samples": 32,
+            "nFirst": 0,
+            "nSecond": 32
+          },
+          {
+            "if": "嘴的长度（毫米） > 44.65 且 体重（克） > 4075.00",
+            "predict": "帽带企鹅",
+            "samples": 10,
+            "nFirst": 2,
+            "nSecond": 8
+          }
+        ]
+      },
+      "depth2-leaf60": {
+        "depth": 2,
+        "minLeaf": 60,
+        "n": 143,
+        "correct": 125,
+        "accuracy": 0.8741,
+        "cm": [
+          [
+            82,
+            17
+          ],
+          [
+            1,
+            43
+          ]
+        ],
+        "pickedFeatures": [
+          "嘴的长度（毫米）"
+        ],
+        "rules": [
+          {
+            "if": "嘴的长度（毫米） ≤ 41.20",
+            "predict": "阿德利企鹅",
+            "samples": 83,
+            "nFirst": 82,
+            "nSecond": 1
+          },
+          {
+            "if": "嘴的长度（毫米） > 41.20",
+            "predict": "帽带企鹅",
+            "samples": 60,
+            "nFirst": 17,
+            "nSecond": 43
+          }
+        ]
+      }
+    }
+  },
+  "sex": {
+    "meta": {
+      "source": "Palmer Penguins LTER · 2007-2008 · 三种企鹅全取、只要性别已知",
+      "model": "sklearn DecisionTreeClassifier(criterion='gini', random_state=42)",
+      "trainRule": "100% 训练：216 只企鹅全部用来学规则，不做 train-test 划分",
+      "cmRule": "行 = 真实 · 列 = 判成",
+      "classes": [
+        "female",
+        "male"
+      ],
+      "classCn": [
+        "母企鹅",
+        "公企鹅"
+      ],
+      "n": 216,
+      "nFirst": 107,
+      "nSecond": 109,
+      "baseline": 0.5046,
+      "features": [
+        "嘴的长度（毫米）",
+        "嘴的厚度（毫米）",
+        "翅膀长度（毫米）",
+        "体重（克）"
+      ]
+    },
+    "combos": {
+      "depth1-leaf10": {
+        "depth": 1,
+        "minLeaf": 10,
+        "n": 216,
+        "correct": 157,
+        "accuracy": 0.7269,
+        "cm": [
+          [
+            60,
+            47
+          ],
+          [
+            12,
+            97
+          ]
+        ],
+        "pickedFeatures": [
+          "体重（克）"
+        ],
+        "rules": [
+          {
+            "if": "体重（克） ≤ 3712.50",
+            "predict": "母企鹅",
+            "samples": 72,
+            "nFirst": 60,
+            "nSecond": 12
+          },
+          {
+            "if": "体重（克） > 3712.50",
+            "predict": "公企鹅",
+            "samples": 144,
+            "nFirst": 47,
+            "nSecond": 97
+          }
+        ]
+      },
+      "depth1-leaf60": {
+        "depth": 1,
+        "minLeaf": 60,
+        "n": 216,
+        "correct": 157,
+        "accuracy": 0.7269,
+        "cm": [
+          [
+            60,
+            47
+          ],
+          [
+            12,
+            97
+          ]
+        ],
+        "pickedFeatures": [
+          "体重（克）"
+        ],
+        "rules": [
+          {
+            "if": "体重（克） ≤ 3712.50",
+            "predict": "母企鹅",
+            "samples": 72,
+            "nFirst": 60,
+            "nSecond": 12
+          },
+          {
+            "if": "体重（克） > 3712.50",
+            "predict": "公企鹅",
+            "samples": 144,
+            "nFirst": 47,
+            "nSecond": 97
+          }
+        ]
+      },
+      "depth2-leaf10": {
+        "depth": 2,
+        "minLeaf": 10,
+        "n": 216,
+        "correct": 190,
+        "accuracy": 0.8796,
+        "cm": [
+          [
+            86,
+            21
+          ],
+          [
+            5,
+            104
+          ]
+        ],
+        "pickedFeatures": [
+          "体重（克）",
+          "嘴的厚度（毫米）"
+        ],
+        "rules": [
+          {
+            "if": "体重（克） ≤ 3712.50 且 嘴的厚度（毫米） ≤ 18.55",
+            "predict": "母企鹅",
+            "samples": 51,
+            "nFirst": 50,
+            "nSecond": 1
+          },
+          {
+            "if": "体重（克） ≤ 3712.50 且 嘴的厚度（毫米） > 18.55",
+            "predict": "公企鹅",
+            "samples": 21,
+            "nFirst": 10,
+            "nSecond": 11
+          },
+          {
+            "if": "体重（克） > 3712.50 且 嘴的厚度（毫米） ≤ 14.85",
+            "predict": "母企鹅",
+            "samples": 40,
+            "nFirst": 36,
+            "nSecond": 4
+          },
+          {
+            "if": "体重（克） > 3712.50 且 嘴的厚度（毫米） > 14.85",
+            "predict": "公企鹅",
+            "samples": 104,
+            "nFirst": 11,
+            "nSecond": 93
+          }
+        ]
+      },
+      "depth2-leaf60": {
+        "depth": 2,
+        "minLeaf": 60,
+        "n": 216,
+        "correct": 173,
+        "accuracy": 0.8009,
+        "cm": [
+          [
+            98,
+            9
+          ],
+          [
+            34,
+            75
+          ]
+        ],
+        "pickedFeatures": [
+          "体重（克）",
+          "嘴的厚度（毫米）"
+        ],
+        "rules": [
+          {
+            "if": "体重（克） ≤ 3712.50",
+            "predict": "母企鹅",
+            "samples": 72,
+            "nFirst": 60,
+            "nSecond": 12
+          },
+          {
+            "if": "体重（克） > 3712.50 且 嘴的厚度（毫米） ≤ 15.65",
+            "predict": "母企鹅",
+            "samples": 60,
+            "nFirst": 38,
+            "nSecond": 22
+          },
+          {
+            "if": "体重（克） > 3712.50 且 嘴的厚度（毫米） > 15.65",
+            "predict": "公企鹅",
+            "samples": 84,
+            "nFirst": 9,
+            "nSecond": 75
+          }
+        ]
+      }
+    }
+  }
+}

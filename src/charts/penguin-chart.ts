@@ -205,6 +205,8 @@ export class ExploreChart {
       const base: ScatterSeriesOption = {
         type: 'scatter',
         name: g.color,
+        // 形状必须显式下发：否则 ECharts 一律按默认圆形渲染（第二类应为三角）
+        symbol: g.symbol,
         data: data as ScatterSeriesOption['data'],
         symbolSize: 13.5,
         itemStyle: { color: g.color, borderColor: '#fff', borderWidth: 1, opacity: 0.85 },

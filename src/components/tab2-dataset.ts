@@ -62,21 +62,9 @@ const FIELD_CARDS: FieldCard[] = [
 
 export function renderDatasetIntro(el: HTMLElement): void {
   const c = data.counts;
-  const adelieBL = data.stats.Adelie.billLength;
-  const chinstrapBL = data.stats.Chinstrap.billLength;
-  const gentooMass = data.stats.Gentoo.mass;
-  const adelieMass = data.stats.Adelie.mass;
-  const gentooBD = data.stats.Gentoo.billDepth;
-
-  const massGap = gentooMass.mean !== null && adelieMass.mean !== null
-    ? formatNumber(Math.round(gentooMass.mean - adelieMass.mean))
-    : '—';
-  const blGap = adelieBL.mean !== null && chinstrapBL.mean !== null
-    ? formatNumber(Number((chinstrapBL.mean - adelieBL.mean).toFixed(1)), 1)
-    : '—';
 
   el.innerHTML = `
-    ${sectionHeader('02', '读懂数据集', '科学家怎么描述一只企鹅？除了"名字"，他们还用尺子和秤测量身体。这一站带你认识每个字段，并从统计表中先睹为快。')}
+    ${sectionHeader('02', '读懂数据集', '科学家怎么描述一只企鹅？除了"名字"，他们还用尺子和秤测量身体。这一站带你认识每个字段，再读一读三个物种的统计画像。')}
 
     <!-- 数据集档案 -->
     <div class="card fade-up p-6 md:p-7">
@@ -159,23 +147,6 @@ export function renderDatasetIntro(el: HTMLElement): void {
       <p class="border-t border-polar-100 bg-polar-50/60 px-6 py-3 text-xs leading-relaxed text-mist">
         注：公 / 母列为已记录性别的样本数（有 ${c.sexMissing} 条记录未记录性别）；个别记录存在测量缺失，各变量按其有效样本计算。
       </p>
-    </div>
-
-    <!-- 先睹为快 -->
-    <h3 class="fade-up mt-10 mb-4 text-lg font-black">先睹为快：表格里藏着的三个发现</h3>
-    <div class="grid gap-4 md:grid-cols-3">
-      <div class="card card-hover p-5">
-        <div class="flex items-center gap-2 text-sm font-black text-gentoo">${symbolSvg('rect', SPECIES_META.Gentoo.color, 12)} 发现 1 · 谁是"大块头"</div>
-        <p class="mt-2 text-sm leading-relaxed text-ink/90">Gentoo 平均体重 ${gentooMass.mean === null ? '—' : formatNumber(Math.round(gentooMass.mean))} 克，比 Adelie 重约 <b class="mono-num">${massGap}</b> 克——体型一眼就能认出 Gentoo。</p>
-      </div>
-      <div class="card card-hover p-5">
-        <div class="flex items-center gap-2 text-sm font-black text-chinstrap">${symbolSvg('triangle', SPECIES_META.Chinstrap.color, 12)} 发现 2 · 体重像，嘴不像</div>
-        <p class="mt-2 text-sm leading-relaxed text-ink/90">Chinstrap 和 Adelie 体重相仿，但 Chinstrap 的嘴平均长 <b class="mono-num">${chinstrapBL.mean === null ? '—' : formatNumber(chinstrapBL.mean, 1)}</b> 毫米，比 Adelie 的 <b class="mono-num">${adelieBL.mean === null ? '—' : formatNumber(adelieBL.mean, 1)}</b> 毫米长约 <b class="mono-num">${blGap}</b> 毫米。</p>
-      </div>
-      <div class="card card-hover p-5">
-        <div class="flex items-center gap-2 text-sm font-black text-adelie">${symbolSvg('circle', SPECIES_META.Adelie.color, 12)} 发现 3 · Gentoo 嘴更"薄"</div>
-        <p class="mt-2 text-sm leading-relaxed text-ink/90">Gentoo 的嘴厚平均约 <b class="mono-num">${gentooBD.mean === null ? '—' : formatNumber(gentooBD.mean, 1)}</b> 毫米，明显小于另两种的 18 毫米上下。</p>
-      </div>
     </div>
   `;
 }
