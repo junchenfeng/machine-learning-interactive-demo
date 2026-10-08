@@ -1,16 +1,18 @@
-// ABOUTME: Tab4 初步分类：复用探索分析布局，左散点图（含决策虚线）+ 右准确率/混淆矩阵
-// 模型全部为预计算结果（scripts/precompute-classifiers.mjs 生成），页面不做任何训练计算
-import { FEATURES, SPECIES_META, trainRecords } from '../data/dataset';
+// ABOUTME: Tab4 初步分类：复用探索分析布局，左散点图（含分界线与误判红圈）+ 右准确率/混淆矩阵
+// 全部参数来自预计算（scripts/precompute-classifiers.mjs），页面只查表渲染；教学上不出现任何算法名词
+import { FEATURES, SPECIES_META, classifySexRows, classifySpeciesRows } from '../data/dataset';
 import modelsJson from '../data/classifier-models.json';
 import { ExploreChart, legendHTML, symbolSvg } from '../charts/penguin-chart';
 import type { DecisionLine, ExploreMode } from '../charts/penguin-chart';
-import type { FeatureKey } from '../data/types';
+import type { FeatureKey, PenguinRecord } from '../data/types';
 
 interface Cell {
   n: number;
   correct: number;
   accuracy: number;
   cm: [[number, number], [number, number]];
+  /** 被判错记录在模型子集内的序号 */
+  misIds: number[];
 }
 
 interface TreeModel extends Cell {
@@ -38,6 +40,12 @@ interface ClassifierModels {
 
 const MODELS = modelsJson as unknown as ClassifierModels;
 
+/** 与预计算脚本严格对应的模型子集 */
+const TASK_ROWS: Record<ExploreMode, PenguinRecord[]> = {
+  species: classifySpeciesRows,
+  sex: classifySexRows,
+};
+
 interface ClassifyState {
   mode: ExploreMode;
   selected: FeatureKey[];
@@ -51,6 +59,7 @@ export interface ClassifyTab {
 const QA_CLASSES = ['border-beak', 'bg-beak-soft', 'shadow-card-hover'];
 const QI_CLASSES = ['border-polar-200', 'bg-white', 'hover:border-polar-300'];
 const FEATURE_ORDER = FEATURES.map((f) => f.key);
+const MIS_COLOR = '#E11D48';
 
 function questionCardHtml(id: string, title: string, desc: string, marks: string, note: string): string {
   return `
@@ -67,7 +76,7 @@ function questionCardHtml(id: string, title: string, desc: string, marks: string
     </button>`;
 }
 
-/** 类别中文名（短） */
+/** 类别中文名（短，用于矩阵表头） */
 function shortName(mode: ExploreMode, ci: 0 | 1): string {
   if (mode === 'species') return ci === 0 ? '阿德利' : '帽带';
   return ci === 0 ? '母' : '公';
@@ -79,23 +88,24 @@ function fullName(mode: ExploreMode, ci: 0 | 1): string {
   return ci === 0 ? '母企鹅' : '公企鹅';
 }
 
-/** 系数紧凑格式：3 位有效数字（0.0761 / -0.0944 / 3.2e-5） */
-function coef(v: number): string {
-  return String(Number(v.toPrecision(3)));
-}
-
-/** OLS 决策线线段：b + w1*x + w2*y = 0.5，裁剪到数据范围（扩 12%）内；不相交返回 null */
-function olsSegment(model: OlsModel, fx: FeatureKey, fy: FeatureKey): { x1: number; y1: number; x2: number; y2: number } | null {
-  const rows = trainRecords;
+/** 分界线线段：b + w1*x + w2*y = 0.5，裁剪到数据范围（扩 12%）内；不相交返回 null */
+function olsSegment(
+  model: OlsModel,
+  fx: FeatureKey,
+  fy: FeatureKey,
+  rows: PenguinRecord[],
+): { x1: number; y1: number; x2: number; y2: number } | null {
   const xs = rows.map((r) => r[fx]).filter((v): v is number => v !== null);
   const ys = rows.map((r) => r[fy]).filter((v): v is number => v !== null);
   if (xs.length === 0 || ys.length === 0) return null;
   const span = (arr: number[]) => ({ min: Math.min(...arr), max: Math.max(...arr) });
+  const sx = span(xs);
+  const sy = span(ys);
   const pad = (s: { min: number; max: number }) => (s.max - s.min) * 0.12;
-  const x0 = span(xs).min - pad(span(xs));
-  const x1 = span(xs).max + pad(span(xs));
-  const y0 = span(ys).min - pad(span(ys));
-  const y1 = span(ys).max + pad(span(ys));
+  const x0 = sx.min - pad(sx);
+  const x1 = sx.max + pad(sx);
+  const y0 = sy.min - pad(sy);
+  const y1 = sy.max + pad(sy);
   const [w1, w2] = model.w;
 
   let px1: number;
@@ -149,10 +159,11 @@ export function renderClassify(container: HTMLElement): ClassifyTab {
     <div class="fade-up mb-7 flex items-start gap-4">
       <span class="mono-num flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-polar-800 text-sm font-bold text-white shadow-card">04</span>
       <div>
-        <h2 class="text-xl font-black md:text-2xl">初步分类：让一条规则替我们判断</h2>
+        <h2 class="text-xl font-black md:text-2xl">初步分类：让电脑画一条分界线</h2>
         <p class="mt-1 max-w-3xl text-sm leading-relaxed text-mist">
-          上一页我们用眼睛找规律，现在交给最简单的模型：选 <b class="text-ink">1 个特征</b>，决策树自动找"一刀切"的位置；
-          选 <b class="text-ink">2 个特征</b>，OLS 拟合一条分类线，分数过 0.5 就判另一类。右侧立即汇报它判对了多少。
+          上一页我们用眼睛找规律，这一页换成电脑来画：选 <b class="text-ink">1 个特征</b>，它自动找"一刀切"的位置；
+          选 <b class="text-ink">2 个特征</b>，它自动画一条直线。画完马上汇报——<b class="text-ink">判对了多少</b>、
+          <b class="text-ink">谁被判错了</b>。
         </p>
       </div>
     </div>
@@ -161,25 +172,25 @@ export function renderClassify(container: HTMLElement): ClassifyTab {
     <div class="fade-up grid gap-4 md:grid-cols-2">
       ${questionCardHtml(
         'species',
-        '问题一 · 训练区分器：Adelie 和 Chinstrap',
-        '把上一页观察到的规律交给模型：让它自动画下决策线，看看切得准不准。',
+        '问题一 · 用一条线分开 Adelie 和 Chinstrap',
+        '上一页我们用眼睛找规律；现在让电脑自动画一条分界线，数数它分对了多少。',
         `<span class="flex items-center gap-0.5">${symbolSvg('circle', SPECIES_META.Adelie.color, 15)}${symbolSvg('triangle', SPECIES_META.Chinstrap.color, 15)}</span>`,
-        '只用这两种企鹅训练',
+        '只用这两种企鹅',
       )}
       ${questionCardHtml(
         'sex',
-        '问题二 · 训练区分器：公企鹅和母企鹅',
-        '同种企鹅公母身材差别不大，三种企鹅混在一起判。模型还能对多少？',
+        '问题二 · 用一条线分开公企鹅和母企鹅',
+        '同种企鹅公母差别不大，三种企鹅混在一起分。这条线还能分对多少？',
         `<span class="flex items-center gap-0.5">${symbolSvg('circle', '#E15A85', 15)}${symbolSvg('circle', '#2F5D8A', 15)}</span>`,
-        '三种企鹅一起判',
+        '三种企鹅一起分',
       )}
     </div>
 
     <!-- 特征选择 -->
     <div class="card fade-up mt-6 p-5 md:p-6">
       <div class="mb-3.5 flex flex-wrap items-center justify-between gap-2">
-        <h3 class="text-[15px] font-black">给模型喂哪个特征？</h3>
-        <span class="text-xs text-mist">最多同时选 2 个：选 1 个 → 决策树一刀切；选 2 个 → OLS 分类线</span>
+        <h3 class="text-[15px] font-black">用哪些特征来分？</h3>
+        <span class="text-xs text-mist">最多同时选 2 个：选 1 个自动找"一刀切"，选 2 个自动画直线</span>
       </div>
       <div id="feature-chips" class="grid grid-cols-2 gap-2.5 md:grid-cols-4"></div>
     </div>
@@ -190,8 +201,10 @@ export function renderClassify(container: HTMLElement): ClassifyTab {
       <div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_330px]">
         <div class="min-w-0">
           <div id="classify-chart" class="w-full" style="height:380px"></div>
-          <p class="mt-3 text-xs text-mist">
-            图中每个点是一只企鹅（单特征图做了轻微上下抖动，便于看到重叠的数据）。橙色虚线 = 模型学到的决策线。数据：训练集（2007-2008）。
+          <p class="mt-3 text-xs leading-relaxed text-mist">
+            图中每个点是一只企鹅（单特征图做了轻微上下抖动，便于看到重叠的数据）。
+            <span class="font-bold text-beak-dark">橙色虚线 = 电脑画的分界线</span>；
+            <span class="font-bold" style="color:${MIS_COLOR}">红圈 = 被分错的企鹅</span>。数据：训练集（2007-2008）。
           </p>
         </div>
         <aside class="flex min-w-0 flex-col gap-4">
@@ -224,7 +237,14 @@ export function renderClassify(container: HTMLElement): ClassifyTab {
 
   function currentModel():
     | { kind: 'tree'; model: TreeModel; feature: FeatureKey }
-    | { kind: 'ols'; model: OlsModel; fx: FeatureKey; fy: FeatureKey; olsKey: string } {
+    | {
+        kind: 'ols';
+        model: OlsModel;
+        fx: FeatureKey;
+        fy: FeatureKey;
+        hasLine: boolean;
+        segment: { x1: number; y1: number; x2: number; y2: number } | null;
+      } {
     const task = MODELS[state.mode];
     if (state.selected.length === 1) {
       const feature = state.selected[0];
@@ -233,8 +253,9 @@ export function renderClassify(container: HTMLElement): ClassifyTab {
     const sorted = [...state.selected].sort(
       (a, b) => FEATURE_ORDER.indexOf(a) - FEATURE_ORDER.indexOf(b),
     );
-    const olsKey = `${sorted[0]}+${sorted[1]}`;
-    return { kind: 'ols', model: task.ols[olsKey], fx: sorted[0], fy: sorted[1], olsKey };
+    const model = task.ols[`${sorted[0]}+${sorted[1]}`];
+    const segment = olsSegment(model, sorted[0], sorted[1], TASK_ROWS[state.mode]);
+    return { kind: 'ols', model, fx: sorted[0], fy: sorted[1], hasLine: segment !== null, segment };
   }
 
   function updateQuestions(): void {
@@ -246,7 +267,10 @@ export function renderClassify(container: HTMLElement): ClassifyTab {
       for (const cls of QA_CLASSES) btn.classList.toggle(cls, active);
       for (const cls of QI_CLASSES) btn.classList.toggle(cls, !active);
       const note = btn.querySelector<HTMLElement>('[data-note]');
-      if (note) note.textContent = `只用这两种企鹅训练 · n=${MODELS[mode].n}`;
+      if (note) {
+        note.textContent =
+          mode === 'species' ? `只用这两种企鹅 · n=${MODELS.species.n}` : `三种企鹅一起分 · n=${MODELS.sex.n}`;
+      }
     }
   }
 
@@ -277,39 +301,39 @@ export function renderClassify(container: HTMLElement): ClassifyTab {
 
   function renderRule(): void {
     if (!ruleEl) return;
-    const task = MODELS[state.mode];
     const cur = currentModel();
     const fMeta = (key: FeatureKey) => FEATURES.find((f) => f.key === key);
-    let title = '';
+    let title = '电脑的规则';
     let body = '';
     if (cur.kind === 'tree') {
       const meta = fMeta(cur.feature);
       const m = cur.model;
       const dec = Math.max(meta?.decimals ?? 0, 1);
       const cutoffText = m.cutoff.toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec });
-      title = '一层决策树 · 找最佳一刀切';
       if (m.leftClass === m.rightClass) {
         body = `
-          <p class="mono-num text-[13px] leading-relaxed text-ink">${meta?.label} ≤/＞ ${cutoffText} ${meta?.unit ?? ''}</p>
-          <p class="mt-1.5 text-[12.5px] leading-relaxed text-mist">无论切在哪，两边都判为 <b>${fullName(state.mode, m.leftClass)}</b>——这个特征分不开这两种企鹅。</p>`;
+          <p class="text-[13px] leading-relaxed text-ink">无论从哪里切，两边都判成 <b>${fullName(state.mode, m.leftClass)}</b>——用 <b>${meta?.label ?? ''}</b> 分不开它们。</p>`;
       } else {
         body = `
           <p class="mono-num text-[13px] leading-relaxed text-ink">${meta?.label} ≤ ${cutoffText} ${meta?.unit ?? ''} → ${fullName(state.mode, m.leftClass)}</p>
           <p class="mono-num text-[13px] leading-relaxed text-ink">${meta?.label} ＞ ${cutoffText} ${meta?.unit ?? ''} → ${fullName(state.mode, m.rightClass)}</p>
-          <p class="mt-1.5 text-[12.5px] leading-relaxed text-mist">树在所有可能的切口里，挑了让两边"最纯"的那一个。</p>`;
+          <p class="mt-1.5 text-[12.5px] leading-relaxed text-mist">电脑试遍了所有能"一刀切"的位置，挑出分得最开的那一个。</p>`;
       }
     } else {
       const mx = fMeta(cur.fx);
       const my = fMeta(cur.fy);
       const m = cur.model;
-      const [w1, w2] = m.w;
-      const term = (w: number, label: string | undefined) =>
-        `${w >= 0 ? '+' : '−'} ${coef(Math.abs(w))}×${label ?? ''}`;
-      title = 'OLS 分类线 · 拟合 0/1 分数';
-      body = `
-        <p class="mono-num text-[13px] leading-relaxed text-ink">分数 = ${coef(m.b)} ${term(w1, mx?.label)} ${term(w2, my?.label)}</p>
-        <p class="mono-num mt-1 text-[13px] leading-relaxed text-ink">分数 ≥ 0.5 → ${fullName(state.mode, 1)}，否则 → ${fullName(state.mode, 0)}</p>
-        <p class="mt-1.5 text-[12.5px] leading-relaxed text-mist">把 0/1 当成普通数字做线性回归，再在 0.5 处"一刀两断"。</p>`;
+      if (!cur.hasLine) {
+        body = `
+          <p class="text-[13px] leading-relaxed text-ink">用 <b>${mx?.label ?? ''} + ${my?.label ?? ''}</b> 画出的直线，把所有企鹅都判成了 <b>${fullName(state.mode, 0)}</b>——这两个特征分不开。</p>`;
+      } else {
+        body = `
+          <p class="text-[13px] leading-relaxed text-ink">电脑根据 <b>${mx?.label ?? ''} + ${my?.label ?? ''}</b> 自动画一条直线：</p>
+          <p class="mt-1 text-[13px] leading-relaxed text-ink">直线的一侧判成 <b>${fullName(state.mode, 0)}</b>，另一侧判成 <b>${fullName(state.mode, 1)}</b>。</p>`;
+      }
+      if (m.misIds.length > 0) {
+        body += `<p class="mt-1.5 text-[12.5px] leading-relaxed text-mist">被线切错的企鹅已在图上画了红圈。</p>`;
+      }
     }
     ruleEl.innerHTML = `
       <div class="flex items-center gap-2">
@@ -329,13 +353,14 @@ export function renderClassify(container: HTMLElement): ClassifyTab {
     const color = accuracyColor(m.accuracy);
     accEl.innerHTML = `
       <div class="flex items-baseline justify-between gap-2">
-        <span class="text-xs font-black text-mist">训练集准确率</span>
+        <span class="text-xs font-black text-mist">它判对了多少？</span>
         <span class="mono-num text-[26px] font-black leading-none ${color.text}">${pct}<span class="text-sm">%</span></span>
       </div>
       <div class="mt-2.5 h-2 overflow-hidden rounded-full bg-polar-100">
         <div class="h-full rounded-full ${color.bar} transition-all duration-500" style="width:${pct}%"></div>
       </div>
-      <p class="mono-num mt-1.5 text-[11px] text-mist">${m.correct} / ${m.n} 只判对 · n=${m.n}</p>`;
+      <p class="mono-num mt-1.5 text-[11px] text-mist">${m.correct} / ${m.n} 只判对 · n=${m.n}</p>
+      <p class="mt-1 text-[11px] leading-relaxed text-mist">准确率 = 判对的 ÷ 总数。企鹅越多、分得越准，这个数就越大。</p>`;
   }
 
   function renderConfusion(): void {
@@ -350,20 +375,23 @@ export function renderClassify(container: HTMLElement): ClassifyTab {
     const head = (text: string): string =>
       `<th class="pb-2 text-center text-[11px] font-bold text-mist">${text}</th>`;
     const rowHead = (text: string): string =>
-      `<th class="w-[74px] pr-1.5 text-right text-[11px] font-bold text-mist">${text}</th>`;
+      `<th class="w-[70px] pr-1.5 text-right text-[11px] font-bold leading-tight text-mist">${text}</th>`;
     confusionEl.innerHTML = `
       <div class="flex items-center justify-between gap-2">
-        <h4 class="text-[13px] font-black">混淆矩阵</h4>
-        <span class="text-[10.5px] text-mist">行 = 真实 · 列 = 预测</span>
+        <h4 class="text-[13px] font-black">谁被判错了？</h4>
+        <span class="text-[10.5px] text-mist">行 = 真实 · 列 = 判成</span>
       </div>
       <table class="mt-2 w-full border-separate border-spacing-0">
-        <thead><tr>${rowHead('')} ${head(`判${shortName(state.mode, 0)}`)} ${head(`判${shortName(state.mode, 1)}`)}</tr></thead>
+        <thead><tr>${rowHead('')} ${head(`判成<br>${shortName(state.mode, 0)}`)} ${head(`判成<br>${shortName(state.mode, 1)}`)}</tr></thead>
         <tbody>
           <tr>${rowHead(`真实<br>${shortName(state.mode, 0)}`)}${cell(tn, true)}${cell(fp, false)}</tr>
           <tr>${rowHead(`真实<br>${shortName(state.mode, 1)}`)}${cell(fn, false)}${cell(tp, true)}</tr>
         </tbody>
       </table>
-      <p class="mt-2 text-[11.5px] leading-relaxed text-mist">绿色 = 判对（对角线）；红色 = 判错。两个红格相加就是全部错误。</p>`;
+      <p class="mt-2 text-[11.5px] leading-relaxed text-mist">
+        绿格 = 判对；红格 = 判错。这张表叫<b class="text-ink">混淆矩阵</b>——
+        <b style="color:${MIS_COLOR}">红格里的数字，就是图上红圈企鹅的个数</b>！
+      </p>`;
   }
 
   function hintText(): string {
@@ -371,12 +399,17 @@ export function renderClassify(container: HTMLElement): ClassifyTab {
     if (cur.kind === 'tree') {
       const meta = FEATURES.find((f) => f.key === cur.feature);
       const m = cur.model;
+      const dec = Math.max(meta?.decimals ?? 0, 1);
+      const cutoffText = m.cutoff.toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec });
       if (m.leftClass === m.rightClass) {
-        return `橙色虚线两侧全被判为${fullName(state.mode, m.leftClass)}（准确率只剩"猜多数类"的水平）。换个特征试试，比如嘴的长度或嘴的厚度。`;
+        return `用「${meta?.label}」分不开这两种企鹅：无论从哪里切，所有企鹅都被判成${fullName(state.mode, m.leftClass)}。换个特征试试，比如嘴的长度。`;
       }
-      return `橙色虚线是决策树找到的最佳切口：${meta?.label} ≤ ${m.cutoff} ${meta?.unit ?? ''} 判为${fullName(state.mode, m.leftClass)}，超过则判为${fullName(state.mode, m.rightClass)}。对照点的颜色，看看这条线切丢了谁。`;
+      return `橙色虚线是电脑找到的最佳分界线：${meta?.label} ≤ ${cutoffText} ${meta?.unit ?? ''} 判成${fullName(state.mode, m.leftClass)}，超过判成${fullName(state.mode, m.rightClass)}。红圈是被分错的企鹅——对照右边红格的数字数一数。`;
     }
-    return `橙色虚线是 OLS 学到的分类线：虚线两侧分别判为${fullName(state.mode, 0)}和${fullName(state.mode, 1)}（分数 0.5 为界）。对照右侧混淆矩阵，数一数被切错的点。`;
+    if (!cur.hasLine) {
+      return `这两个特征分不开：直线把所有企鹅都判成了${fullName(state.mode, 0)}。试试「嘴的长度 + 嘴的厚度」，看看红圈会不会变少。`;
+    }
+    return `橙色虚线是电脑根据两个特征画出的分界线，线的一侧判成${fullName(state.mode, 0)}、另一侧判成${fullName(state.mode, 1)}。鼠标点开红圈企鹅，看看它们错在哪里——是不是正好长在分界线附近？`;
   }
 
   function updateChart(): void {
@@ -390,22 +423,25 @@ export function renderClassify(container: HTMLElement): ClassifyTab {
     state.chart.resize();
 
     const cur = currentModel();
+    const rows = TASK_ROWS[state.mode];
+    const misSet = new Set<PenguinRecord>(cur.model.misIds.map((i) => rows[i]));
+
     let decisionLine: DecisionLine | null = null;
     if (cur.kind === 'tree') {
       const meta = FEATURES.find((f) => f.key === cur.feature);
       const dec = Math.max(meta?.decimals ?? 0, 1);
       const cutoffText = cur.model.cutoff.toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec });
-      decisionLine = { vertical: { x: cur.model.cutoff, label: `决策线 ${cutoffText} ${meta?.unit ?? ''}` } };
-    } else {
-      const seg = olsSegment(cur.model, cur.fx, cur.fy);
-      decisionLine = seg ? { segment: { ...seg, label: 'OLS 分类线' } } : null;
+      decisionLine = { vertical: { x: cur.model.cutoff, label: `分界线 ${cutoffText} ${meta?.unit ?? ''}` } };
+    } else if (cur.segment) {
+      decisionLine = { segment: { ...cur.segment, label: '分界线' } };
     }
 
     state.chart.update({
       mode: state.mode,
       features: state.selected,
-      records: trainRecords,
+      records: rows,
       decisionLine,
+      misSet,
     });
   }
 

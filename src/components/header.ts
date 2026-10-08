@@ -1,5 +1,5 @@
 // ABOUTME: 页面外壳：顶部横幅、Tab 导航（吸顶）、主内容容器与页脚
-export type TabId = 'species' | 'dataset' | 'explore' | 'classify';
+export type TabId = 'species' | 'dataset' | 'explore' | 'classify' | 'model';
 
 export interface TabDef {
   id: TabId;
@@ -12,6 +12,7 @@ export const TABS: TabDef[] = [
   { id: 'dataset', label: '认识数据集', step: '02' },
   { id: 'explore', label: '探索分析', step: '03' },
   { id: 'classify', label: '初步分类', step: '04' },
+  { id: 'model', label: '训练决策树', step: '05' },
 ];
 
 function iconPenguin(): string {
@@ -49,10 +50,20 @@ function iconClassify(): string {
   </svg>`;
 }
 
+function iconTree(): string {
+  return `<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" aria-hidden="true">
+    <path d="M12 3v5m0 0-5.5 4.5V19M12 8l5.5 4.5V19" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="6.5" cy="20.4" r="1.6" fill="currentColor"/>
+    <circle cx="17.5" cy="20.4" r="1.6" fill="currentColor"/>
+    <rect x="10.4" y="2" width="3.2" height="3.2" rx="0.8" fill="currentColor"/>
+  </svg>`;
+}
+
 export function tabIcon(id: TabId): string {
   if (id === 'species') return iconPenguin();
   if (id === 'dataset') return iconTable();
   if (id === 'classify') return iconClassify();
+  if (id === 'model') return iconTree();
   return iconScatter();
 }
 
@@ -76,7 +87,7 @@ export function renderShell(root: HTMLElement): void {
         <h1 class="mt-4 text-3xl font-black leading-tight md:text-[2.6rem]">企鹅数据观测站</h1>
         <p class="mt-2 max-w-2xl text-sm leading-relaxed text-polar-100 md:text-base">
           欢迎加入见习科考队！南极帕默群岛住着三种企鹅，我们收集了它们三年间
-          <b class="text-white">344 份</b>体检记录。一步步来：先认识朋友，再读懂数据，最后像科学家一样探索。
+          <b class="text-white">344 份</b>体检记录。一步步来：先认识朋友，再读懂数据，像科学家一样探索，最后让 AI 自己学规则。
         </p>
         <div class="mono-num mt-5 flex flex-wrap gap-2 text-xs">
           <span class="rounded-md bg-white/10 px-2.5 py-1.5">344 只企鹅</span>
@@ -105,6 +116,7 @@ export function renderShell(root: HTMLElement): void {
       <section id="panel-dataset" class="hidden"></section>
       <section id="panel-explore" class="hidden"></section>
       <section id="panel-classify" class="hidden"></section>
+      <section id="panel-model" class="hidden"></section>
     </main>
 
     <footer class="border-t border-polar-100 bg-white">

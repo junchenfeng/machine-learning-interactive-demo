@@ -1,4 +1,4 @@
-// ABOUTME: 应用入口：渲染外壳并管理四个 Tab 的切换与懒加载
+// ABOUTME: 应用入口：渲染外壳并管理五个 Tab 的切换与懒加载
 import { TABS, activateTab, renderShell } from './components/header';
 import type { TabId } from './components/header';
 import { renderSpeciesIntro } from './components/tab1-species';
@@ -7,6 +7,8 @@ import { renderExplore } from './components/tab3-explore';
 import type { ExploreTab } from './components/tab3-explore';
 import { renderClassify } from './components/tab4-classify';
 import type { ClassifyTab } from './components/tab4-classify';
+import { renderModel } from './components/tab5-model';
+import type { ModelTab } from './components/tab5-model';
 
 export function initApp(): void {
   const app = document.getElementById('app');
@@ -21,7 +23,8 @@ export function initApp(): void {
   const panelDataset = document.getElementById('panel-dataset');
   const panelExplore = document.getElementById('panel-explore');
   const panelClassify = document.getElementById('panel-classify');
-  if (!panelSpecies || !panelDataset || !panelExplore || !panelClassify) return;
+  const panelModel = document.getElementById('panel-model');
+  if (!panelSpecies || !panelDataset || !panelExplore || !panelClassify || !panelModel) return;
 
   renderSpeciesIntro(panelSpecies);
 
@@ -31,10 +34,18 @@ export function initApp(): void {
     dataset: panelDataset,
     explore: panelExplore,
     classify: panelClassify,
+    model: panelModel,
   };
-  const inited: Record<TabId, boolean> = { species: true, dataset: false, explore: false, classify: false };
+  const inited: Record<TabId, boolean> = {
+    species: true,
+    dataset: false,
+    explore: false,
+    classify: false,
+    model: false,
+  };
   let exploreTab: ExploreTab | null = null;
   let classifyTab: ClassifyTab | null = null;
+  let modelTab: ModelTab | null = null;
   let current: TabId = 'species';
 
   function show(tab: TabId): void {
@@ -54,10 +65,14 @@ export function initApp(): void {
       } else if (tab === 'classify') {
         classifyTab = renderClassify(panels.classify);
         inited.classify = true;
+      } else if (tab === 'model') {
+        modelTab = renderModel(panels.model);
+        inited.model = true;
       }
     }
     if (tab === 'explore') exploreTab?.onShow();
     if (tab === 'classify') classifyTab?.onShow();
+    if (tab === 'model') modelTab?.onShow();
   }
 
   const nav = document.getElementById('tab-nav');

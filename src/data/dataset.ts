@@ -9,6 +9,28 @@ export const trainRecords: PenguinRecord[] = raw.records.filter(
   (r) => r.year === 2007 || r.year === 2008,
 );
 
+/**
+ * 初步分类页模型子集：与预计算脚本（scripts/precompute-classifiers.mjs）的过滤与顺序严格一致，
+ * classifier-models.json 中的 misIds（被判错序号）按此数组对位。
+ */
+export const classifySpeciesRows: PenguinRecord[] = trainRecords.filter(
+  (r) =>
+    (r.species === 'Adelie' || r.species === 'Chinstrap') &&
+    r.billLength !== null &&
+    r.billDepth !== null &&
+    r.flipper !== null &&
+    r.mass !== null,
+);
+
+export const classifySexRows: PenguinRecord[] = trainRecords.filter(
+  (r) =>
+    r.sex !== null &&
+    r.billLength !== null &&
+    r.billDepth !== null &&
+    r.flipper !== null &&
+    r.mass !== null,
+);
+
 export const ALL_SPECIES: Species[] = ['Adelie', 'Chinstrap', 'Gentoo'];
 
 export interface SpeciesMeta {

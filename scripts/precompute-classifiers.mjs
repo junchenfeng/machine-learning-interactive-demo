@@ -31,19 +31,22 @@ function gini(rows) {
 }
 
 function confusion(rows, predict) {
-  // cm[真实][预测]，类 0 / 类 1
+  // cm[真实][预测]，类 0 / 类 1；misIds = 被判错记录在模型子集内的序号（供前端在图上标红圈）
   const cm = [
     [0, 0],
     [0, 0],
   ];
   let correct = 0;
-  for (const r of rows) {
+  const misIds = [];
+  for (let i = 0; i < rows.length; i++) {
+    const r = rows[i];
     const p = predict(r);
     cm[r.y][p] += 1;
     if (p === r.y) correct += 1;
+    else misIds.push(i);
   }
   const n = rows.length;
-  return { n, correct, accuracy: round(correct / n, 4), cm };
+  return { n, correct, accuracy: round(correct / n, 4), cm, misIds };
 }
 
 /** 1 层决策树：返回 cutoff / 左右叶类别 / 训练准确率 / 混淆矩阵 */

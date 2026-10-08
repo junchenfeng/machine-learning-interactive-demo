@@ -1,10 +1,10 @@
-// ABOUTME: 探索分析页散点图封装（ECharts 按需引入），样式对齐参考图：顶部 HTML 图例 + 白底散点
+// ABOUTME: 散点图封装（ECharts 按需引入）：顶部 HTML 图例 + 白底散点，支持分类分界线与误判点标记
 import * as echarts from 'echarts/core';
-import { ScatterChart } from 'echarts/charts';
+import { LineChart, ScatterChart } from 'echarts/charts';
 import { GridComponent, MarkLineComponent, TooltipComponent } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import type { ComposeOption } from 'echarts/core';
-import type { ScatterSeriesOption } from 'echarts/charts';
+import type { LineSeriesOption, ScatterSeriesOption } from 'echarts/charts';
 import type {
   GridComponentOption,
   TooltipComponentOption,
@@ -19,10 +19,10 @@ import {
 } from '../data/dataset';
 import type { FeatureKey, PenguinRecord, Sex, Species } from '../data/types';
 
-echarts.use([ScatterChart, GridComponent, MarkLineComponent, TooltipComponent, CanvasRenderer]);
+echarts.use([LineChart, ScatterChart, GridComponent, MarkLineComponent, TooltipComponent, CanvasRenderer]);
 
 export type ChartOption = ComposeOption<
-  ScatterSeriesOption | GridComponentOption | TooltipComponentOption
+  LineSeriesOption | ScatterSeriesOption | GridComponentOption | TooltipComponentOption
 >;
 
 /** 从组合类型中提取坐标轴选项（ECharts 未从子模块直接导出轴类型） */
@@ -35,25 +35,28 @@ export interface ExploreChartOptions {
   mode: ExploreMode;
   features: FeatureKey[];
   records: PenguinRecord[];
-  /** 初步分类页的决策虚线；探索分析页不传 */
+  /** 初步分类页的分界线；探索分析页不传 */
   decisionLine?: DecisionLine | null;
+  /** 被分错的记录引用集合（初步分类页）：图上加粗红描边，与混淆矩阵红格对应 */
+  misSet?: Set<PenguinRecord> | null;
 }
 
 interface ChartDatum {
   value: [number, number];
   species: Species;
   sex: Sex | null;
+  mis: boolean;
 }
 
 const FEATURE_MAP = new Map(FEATURES.map((f) => [f.key, f]));
 const MONO = 'ui-monospace, SF Mono, Cascadia Code, Consolas, Menlo, monospace';
 const Q1_SPECIES: Species[] = ['Adelie', 'Chinstrap'];
 
-/** 分类决策虚线（初步分类页使用，探索分析页不传则不画线） */
+/** 分类分界线（初步分类页使用，探索分析页不传则不画线） */
 export interface DecisionLine {
-  /** 单特征决策树：x = cutoff 的垂直虚线 */
+  /** 单特征：x = cutoff 的垂直虚线 */
   vertical?: { x: number; label: string };
-  /** 双特征 OLS：裁剪到数据范围后的线段端点 */
+  /** 双特征：自动裁剪后的直线段端点 */
   segment?: { x1: number; y1: number; x2: number; y2: number; label: string };
 }
 
@@ -99,20 +102,22 @@ function buildSeriesData(
   features: FeatureKey[],
   categories: Species[],
   is1D: boolean,
+  misSet: Set<PenguinRecord> | null,
 ): ChartDatum[] {
   const out: ChartDatum[] = [];
   for (const r of rows) {
     const x = getFeatureValue(r, features[0]);
     if (x === null) continue;
+    const mis = misSet !== null && misSet.has(r);
     if (is1D) {
       const catIdx = categories.indexOf(r.species);
       if (catIdx < 0) continue;
       const jitter = (Math.random() - 0.5) * 0.26;
-      out.push({ value: [x, catIdx + jitter], species: r.species, sex: r.sex });
+      out.push({ value: [x, catIdx + jitter], species: r.species, sex: r.sex, mis });
     } else {
       const y = getFeatureValue(r, features[1]);
       if (y === null) continue;
-      out.push({ value: [x, y], species: r.species, sex: r.sex });
+      out.push({ value: [x, y], species: r.species, sex: r.sex, mis });
     }
   }
   return out;
@@ -145,7 +150,7 @@ export class ExploreChart {
   }
 
   update(opts: ExploreChartOptions): void {
-    const { mode, features, records, decisionLine } = opts;
+    const { mode, features, records, decisionLine, misSet } = opts;
     const is1D = features.length === 1;
     const f0 = FEATURE_MAP.get(features[0]);
     const f1 = is1D ? undefined : FEATURE_MAP.get(features[1]);
@@ -175,15 +180,20 @@ export class ExploreChart {
 
     const xMeta = f0 ?? FEATURES[0];
 
-    const series: ScatterSeriesOption[] = groups.map((g, gi) => {
-      const data = buildSeriesData(g.rows, features, categories, is1D).map((d) => {
+    const series: (ScatterSeriesOption | LineSeriesOption)[] = groups.map((g, gi) => {
+      const data = buildSeriesData(g.rows, features, categories, is1D, misSet ?? null).map((d) => {
         const point: ChartDatum & Record<string, unknown> = {
           value: d.value,
           species: d.species,
           sex: d.sex,
+          mis: d.mis,
         };
         if (g.symbol === null) {
           point.symbol = SPECIES_META[d.species].symbol;
+        }
+        // 被分错的企鹅：加粗红描边（与混淆矩阵红格对应）
+        if (d.mis) {
+          point.itemStyle = { color: g.color, borderColor: '#E11D48', borderWidth: 2.6, opacity: 0.95 };
         }
         return point;
       });
@@ -197,56 +207,60 @@ export class ExploreChart {
         emphasis: { scale: 1.35 },
       };
 
-      // 决策虚线只挂一次（首个系列）
-      if (gi === 0 && decisionLine) {
-        const lineStyle = { color: '#F97316', type: 'dashed' as const, width: 2.4 };
-        if (decisionLine.vertical) {
-          base.markLine = {
-            silent: true,
-            symbol: 'none',
-            animation: false,
-            lineStyle,
-            label: {
-              formatter: decisionLine.vertical.label,
-              color: '#12324F',
-              fontWeight: 700,
-              fontSize: 12,
-              position: 'insideEndTop',
-            },
-            data: [{ xAxis: decisionLine.vertical.x }],
-          };
-        } else if (decisionLine.segment) {
-          const s = decisionLine.segment;
-          base.markLine = {
-            silent: true,
-            symbol: 'none',
-            animation: false,
-            lineStyle,
-            label: {
-              formatter: s.label,
-              color: '#12324F',
-              fontWeight: 700,
-              fontSize: 12,
-              position: 'middle',
-              distance: 10,
-            },
-            data: [
-              [
-                { coord: [s.x1, s.y1] },
-                { coord: [s.x2, s.y2] },
-              ],
-            ],
-          };
-        }
+      // 单特征分界线：垂直虚线（只挂一次，首个系列）
+      if (gi === 0 && decisionLine?.vertical) {
+        base.markLine = {
+          silent: true,
+          symbol: 'none',
+          animation: false,
+          lineStyle: { color: '#F97316', type: 'dashed', width: 2.4 },
+          label: {
+            formatter: decisionLine.vertical.label,
+            color: '#12324F',
+            fontWeight: 700,
+            fontSize: 12,
+            position: 'insideEndTop',
+          },
+          data: [{ xAxis: decisionLine.vertical.x }],
+        };
       }
       return base;
     });
+
+    // 双特征分界线：虚线线段用 line series 绘制（clip 自动裁剪到绘图区；
+    // 不用 markLine，因为其 dataFilter 会对线段端点做 containData 过滤，端点在数据范围外会被整条丢弃）
+    if (decisionLine?.segment) {
+      const s = decisionLine.segment;
+      series.push({
+        type: 'line',
+        name: 'boundary',
+        data: [
+          [s.x1, s.y1],
+          [s.x2, s.y2],
+        ],
+        showSymbol: false,
+        silent: true,
+        animation: false,
+        clip: true,
+        z: 6,
+        lineStyle: { color: '#F97316', type: 'dashed', width: 2.4 },
+        endLabel: {
+          show: true,
+          formatter: s.label,
+          color: '#12324F',
+          fontWeight: 700,
+          fontSize: 12,
+          distance: 8,
+        },
+      });
+    }
 
     const tooltipFormatter = (params: unknown): string => {
       const raw = Array.isArray(params) ? params[0] : params;
       const datum = (raw as { data?: ChartDatum }).data;
       if (!datum) return '';
       const sexText = datum.sex ? ` · ${datum.sex === 'female' ? '母' : '公'}` : '';
+      const misText = datum.mis ? '<br/><b style="color:#E11D48">✗ 被分错了</b>' : '';
       const meta = FEATURE_MAP.get(features[0]);
       const unit = meta ? meta.unit : '';
       const dec = meta ? meta.decimals : 0;
@@ -256,7 +270,8 @@ export class ExploreChart {
       return (
         `<b>${datum.species}</b>${sexText}` +
         `<br/>${xMeta.axis}：<b class="mono-num">${formatNumber(datum.value[0], dec)}</b> ${unit}` +
-        second
+        second +
+        misText
       );
     };
 
