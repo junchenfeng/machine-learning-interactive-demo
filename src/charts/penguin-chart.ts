@@ -100,7 +100,7 @@ interface GroupSpec {
 function buildSeriesData(
   rows: PenguinRecord[],
   features: FeatureKey[],
-  categories: Species[],
+  rowOf: (r: PenguinRecord) => number,
   is1D: boolean,
   misSet: Set<PenguinRecord> | null,
 ): ChartDatum[] {
@@ -110,7 +110,7 @@ function buildSeriesData(
     if (x === null) continue;
     const mis = misSet !== null && misSet.has(r);
     if (is1D) {
-      const catIdx = categories.indexOf(r.species);
+      const catIdx = rowOf(r);
       if (catIdx < 0) continue;
       const jitter = (Math.random() - 0.5) * 0.26;
       out.push({ value: [x, catIdx + jitter], species: r.species, sex: r.sex, mis });
@@ -156,10 +156,14 @@ export class ExploreChart {
     const f1 = is1D ? undefined : FEATURE_MAP.get(features[1]);
 
     let groups: GroupSpec[];
-    let categories: Species[] = [];
+    // 单特征图的类别轴 = 当前研究问题的目标类别：
+    // 区分企鹅 → 物种两行；区分公母 → 母/公两行（形状仍按物种区分）
+    let categories: string[] = [];
+    let rowOf: (r: PenguinRecord) => number;
 
     if (mode === 'species') {
       categories = Q1_SPECIES;
+      rowOf = (r: PenguinRecord) => Q1_SPECIES.indexOf(r.species);
       const rows = records.filter(
         (r) => Q1_SPECIES.includes(r.species) && features.every((k) => getFeatureValue(r, k) !== null),
       );
@@ -168,7 +172,6 @@ export class ExploreChart {
         { color: SPECIES_META.Chinstrap.color, symbol: 'triangle', rows: rows.filter((r) => r.species === 'Chinstrap') },
       ];
     } else {
-      categories = ALL_SPECIES;
       const rows = records.filter(
         (r) => r.sex !== null && features.every((k) => getFeatureValue(r, k) !== null),
       );
@@ -176,6 +179,13 @@ export class ExploreChart {
         { color: SEX_META.female.color, symbol: null, rows: rows.filter((r) => r.sex === 'female') },
         { color: SEX_META.male.color, symbol: null, rows: rows.filter((r) => r.sex === 'male') },
       ];
+      if (is1D) {
+        categories = ['母', '公'];
+        rowOf = (r: PenguinRecord) => (r.sex === 'female' ? 0 : 1);
+      } else {
+        categories = ALL_SPECIES;
+        rowOf = (r: PenguinRecord) => ALL_SPECIES.indexOf(r.species);
+      }
     }
 
     const xMeta = f0 ?? FEATURES[0];

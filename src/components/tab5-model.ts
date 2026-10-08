@@ -117,10 +117,13 @@ function pickedHtml(combo: TreeCombo): string {
         </span>`,
     )
     .join('');
+  const unused = treeData.meta.features.filter((f) => !combo.pickedFeatures.includes(f));
   const note =
     combo.depth === 1
-      ? `depth = 1 时它只挑 1 个特征——另外 3 个全没用上！`
-      : `多给一层，它又自动补挑了别的特征。`;
+      ? `depth = 1 时它只挑 1 个特征——另外 ${unused.length} 个全没用上！`
+      : combo.pickedFeatures.length > 1
+        ? `多给一层，它自动补挑了别的特征；没用上的：${unused.join('、') || '（无）'}。`
+        : `即使多给一层，它依然只用这一个特征就够分了。`;
   return `
     <div class="rounded-xl border border-polar-200 bg-polar-50 p-4">
       <div class="flex items-center gap-2 text-[13px] font-black text-polar-800">
@@ -135,17 +138,19 @@ function pickedHtml(combo: TreeCombo): string {
 }
 
 function accuracyHtml(combo: TreeCombo): string {
+  const barColor = combo.accuracy >= 0.9 ? 'bg-emerald-500' : combo.accuracy >= 0.7 ? 'bg-polar-500' : 'bg-beak';
+  const numColor = combo.accuracy >= 0.9 ? 'text-emerald-600' : combo.accuracy >= 0.7 ? 'text-polar-600' : 'text-beak-dark';
   return `
     <div class="rounded-xl border border-polar-200 bg-white p-4">
       <div class="text-[13px] font-black text-polar-800">在 143 只企鹅上的答对率</div>
       <div class="mono-num mt-2 flex items-baseline gap-2">
-        <span class="text-4xl font-black text-polar-700">${percent(combo.accuracy)}</span>
+        <span class="text-4xl font-black ${numColor}">${percent(combo.accuracy)}</span>
         <span class="text-xs text-mist">${combo.correct} / ${combo.n} 只</span>
       </div>
       <div class="mt-3 h-2 overflow-hidden rounded-full bg-polar-100">
-        <div class="h-full rounded-full bg-polar-500" style="width:${(combo.accuracy * 100).toFixed(1)}%"></div>
+        <div class="h-full rounded-full ${barColor}" style="width:${(combo.accuracy * 100).toFixed(1)}%"></div>
       </div>
-      <p class="mt-2 text-[12.5px] text-mist">全部 143 只都参与了训练与检验（100% 训练）。</p>
+      <p class="mt-2 text-[12.5px] text-mist">准确率 = 判对的 ÷ 总数。全部 143 只都参与了训练（100% 训练）。</p>
     </div>`;
 }
 
@@ -155,10 +160,10 @@ function confusionHtml(combo: TreeCombo): string {
   const [ba, bb] = b;
   const cell = (hit: boolean, v: number): string =>
     `<td class="mono-num">
-       <span class="inline-flex min-w-14 items-center justify-center rounded-lg px-3 py-2 text-base font-black ${
-         hit ? 'bg-polar-100 text-polar-800' : 'bg-beak-soft text-beak-dark'
+       <span class="inline-flex min-w-14 items-center justify-center rounded-lg border px-3 py-2 text-base font-black ${
+         hit ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-rose-200 bg-rose-50 text-rose-700'
        }">${v}</span>
-       <span class="block text-[10.5px] ${hit ? 'text-mist' : 'text-beak-dark'}">${hit ? '判对' : '判错'}</span>
+       <span class="block text-[10.5px] ${hit ? 'text-mist' : 'text-rose-600'}">${hit ? '判对' : '判错'}</span>
      </td>`;
   return `
     <div class="rounded-xl border border-polar-200 bg-white p-4">
@@ -182,7 +187,7 @@ function confusionHtml(combo: TreeCombo): string {
         </tbody>
       </table>
       <p class="mt-2.5 text-[12.5px] leading-relaxed text-mist">
-        横看"真实身份"，竖看"模型判断"。<b class="text-ink">橙色格子是模型犯的错</b>——数一数 ${ab + ba} 次错误里，它把谁认成了谁？
+        横看"真实身份"，竖看"模型判断"。<b class="text-ink">玫红色格子是模型犯的错</b>——数一数 ${ab + ba} 次错误里，它把谁认成了谁？
       </p>
     </div>`;
 }
@@ -236,20 +241,37 @@ function treeImageHtml(combo: TreeCombo): string {
 }
 
 function hintHtml(combo: TreeCombo): string {
-  const depthLine =
-    combo.depth === 1
-      ? '只许问 1 个问题，它就挑出了最有效的那个特征——和你在上一页找到的分界线接近吗？'
-      : '多问一个问题后，它把上一页你看不太清的地方又切了一刀。';
-  const leafLine =
-    combo.minLeaf === 30
-      ? '每片叶子至少装 30 只企鹅，规则更"粗"，能抓住最明显的规律。'
-      : '每片叶子最少 10 只，规则更"细"——对比 min-leaf = 30 的准确率，看看细规则值不值。';
+  const combos = treeData.combos;
+  const accOf = (d: number, l: number): number => combos[`d${d}-leaf${l}`]?.accuracy ?? -1;
+  const lines: string[] = [];
+
+  if (combo.depth === 1) {
+    lines.push(
+      '只许问 1 个问题，它就自动挑出了最有效的特征——和你在上一页找到的分界线接近吗？',
+    );
+  } else {
+    const accD1 = accOf(1, combo.minLeaf);
+    lines.push(
+      accD1 === combo.accuracy
+        ? 'depth 从 1 调到 2，成绩一点没变：多出来的一层只是把叶子切得更"纯"，并没有改变判断——模型的"核心规则"其实就一条。'
+        : `允许问第 2 个问题后，成绩从 ${percent(accD1)} 变成了 ${percent(combo.accuracy)}——多一层，边界就能画得更细。`,
+    );
+  }
+
+  const otherLeaf = combo.minLeaf === 30 ? 10 : 30;
+  const accOtherLeaf = accOf(combo.depth, otherLeaf);
+  lines.push(
+    accOtherLeaf === combo.accuracy
+      ? `min-leaf = ${otherLeaf} 和 ${combo.minLeaf} 的成绩一模一样：两种参数学到的是同一条判断，差别只在树的样子和叶子的"纯度"（gini）。`
+      : `每片叶子最少 ${combo.minLeaf} 只——对比 min-leaf = ${otherLeaf}（${percent(accOtherLeaf)}），看看规则变细后成绩怎么变。`,
+  );
+
   return `
     <div class="mt-4 flex items-start gap-2.5 rounded-xl border border-dashed border-polar-300 bg-polar-50 px-4 py-3">
       <span class="mt-0.5 shrink-0 text-polar-500">
         <svg viewBox="0 0 24 24" class="h-4.5 w-4.5" fill="none" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6" stroke="currentColor" stroke-width="2"/><path d="m15.5 15.5 4.5 4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       </span>
-      <p class="text-[13px] leading-relaxed text-polar-700">${depthLine}${leafLine}</p>
+      <p class="text-[13px] leading-relaxed text-polar-700">${lines.join('')}</p>
     </div>`;
 }
 
