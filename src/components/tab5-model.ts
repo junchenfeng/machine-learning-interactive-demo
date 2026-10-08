@@ -51,7 +51,7 @@ const PARAM_IDLE = 'border-polar-200 bg-white text-ink hover:border-polar-400';
 
 interface ModelParams {
   depth: 1 | 2;
-  minLeaf: 10 | 30;
+  minLeaf: 10 | 60;
 }
 
 function comboKey(p: ModelParams): string {
@@ -97,7 +97,7 @@ function paramCardHtml(p: ModelParams): string {
         <div>
           <div class="mb-2 text-xs font-bold text-polar-700">每片叶子最少几只企鹅（min-leaf node）</div>
           <div class="flex gap-2.5">
-            ${paramButton('leaf', 30, 'min-leaf = 30', '规则更简单', p.minLeaf === 30)}
+            ${paramButton('leaf', 60, 'min-leaf = 60', '规则更简单', p.minLeaf === 60)}
             ${paramButton('leaf', 10, 'min-leaf = 10', '规则更细', p.minLeaf === 10)}
           </div>
         </div>
@@ -250,15 +250,18 @@ function hintHtml(combo: TreeCombo): string {
       '只许问 1 个问题，它就自动挑出了最有效的特征——和你在上一页找到的分界线接近吗？',
     );
   } else {
-    const accD1 = accOf(1, combo.minLeaf);
+    const other = combos[`d1-leaf${combo.minLeaf}`];
+    const accD1 = other?.accuracy ?? -1;
     lines.push(
-      accD1 === combo.accuracy
-        ? 'depth 从 1 调到 2，成绩一点没变：多出来的一层只是把叶子切得更"纯"，并没有改变判断——模型的"核心规则"其实就一条。'
-        : `允许问第 2 个问题后，成绩从 ${percent(accD1)} 变成了 ${percent(combo.accuracy)}——多一层，边界就能画得更细。`,
+      accD1 !== combo.accuracy
+        ? `允许问第 2 个问题后，成绩从 ${percent(accD1)} 变成了 ${percent(combo.accuracy)}——多一层，边界就能画得更细。`
+        : other && other.rules.length === combo.rules.length
+          ? `depth 从 1 调到 2，两棵树完全一样：min-leaf = ${combo.minLeaf} 太大了，第一层切完每一堆都不够 ${combo.minLeaf} 只，第二层根本切不动。`
+          : 'depth 从 1 调到 2，成绩一点没变：多出来的一层只是把叶子切得更"纯"，并没有改变判断——模型的"核心规则"其实就一条。',
     );
   }
 
-  const otherLeaf = combo.minLeaf === 30 ? 10 : 30;
+  const otherLeaf = combo.minLeaf === 60 ? 10 : 60;
   const accOtherLeaf = accOf(combo.depth, otherLeaf);
   lines.push(
     accOtherLeaf === combo.accuracy
@@ -375,7 +378,7 @@ export function renderModel(container: HTMLElement): ModelTab {
     if (group === 'depth' && (value === 1 || value === 2) && state.depth !== value) {
       state.depth = value;
       updateAll();
-    } else if (group === 'leaf' && (value === 10 || value === 30) && state.minLeaf !== value) {
+    } else if (group === 'leaf' && (value === 10 || value === 60) && state.minLeaf !== value) {
       state.minLeaf = value;
       updateAll();
     }

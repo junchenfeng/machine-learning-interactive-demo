@@ -61,20 +61,20 @@
       ],
       "image": "/trees/depth1-leaf10.png"
     },
-    "d1-leaf30": {
+    "d1-leaf60": {
       "depth": 1,
-      "minLeaf": 30,
+      "minLeaf": 60,
       "n": 143,
-      "correct": 137,
-      "accuracy": 0.958,
+      "correct": 125,
+      "accuracy": 0.8741,
       "cm": [
         [
-          97,
-          2
+          82,
+          17
         ],
         [
-          4,
-          40
+          1,
+          43
         ]
       ],
       "pickedFeatures": [
@@ -82,21 +82,21 @@
       ],
       "rules": [
         {
-          "if": "嘴的长度（毫米） ≤ 44.65",
+          "if": "嘴的长度（毫米） ≤ 41.20",
           "predict": "阿德利企鹅",
-          "samples": 101,
-          "nAdelie": 97,
-          "nChinstrap": 4
+          "samples": 83,
+          "nAdelie": 82,
+          "nChinstrap": 1
         },
         {
-          "if": "嘴的长度（毫米） > 44.65",
+          "if": "嘴的长度（毫米） > 41.20",
           "predict": "帽带企鹅",
-          "samples": 42,
-          "nAdelie": 2,
-          "nChinstrap": 40
+          "samples": 60,
+          "nAdelie": 17,
+          "nChinstrap": 43
         }
       ],
-      "image": "/trees/depth1-leaf30.png"
+      "image": "/trees/depth1-leaf60.png"
     },
     "d2-leaf10": {
       "depth": 2,
@@ -150,20 +150,20 @@
       ],
       "image": "/trees/depth2-leaf10.png"
     },
-    "d2-leaf30": {
+    "d2-leaf60": {
       "depth": 2,
-      "minLeaf": 30,
+      "minLeaf": 60,
       "n": 143,
-      "correct": 137,
-      "accuracy": 0.958,
+      "correct": 125,
+      "accuracy": 0.8741,
       "cm": [
         [
-          97,
-          2
+          82,
+          17
         ],
         [
-          4,
-          40
+          1,
+          43
         ]
       ],
       "pickedFeatures": [
@@ -171,28 +171,21 @@
       ],
       "rules": [
         {
-          "if": "嘴的长度（毫米） ≤ 40.55",
+          "if": "嘴的长度（毫米） ≤ 41.20",
           "predict": "阿德利企鹅",
-          "samples": 71,
-          "nAdelie": 71,
-          "nChinstrap": 0
+          "samples": 83,
+          "nAdelie": 82,
+          "nChinstrap": 1
         },
         {
-          "if": "嘴的长度（毫米） ≤ 44.65 且 嘴的长度（毫米） > 40.55",
-          "predict": "阿德利企鹅",
-          "samples": 30,
-          "nAdelie": 26,
-          "nChinstrap": 4
-        },
-        {
-          "if": "嘴的长度（毫米） > 44.65",
+          "if": "嘴的长度（毫米） > 41.20",
           "predict": "帽带企鹅",
-          "samples": 42,
-          "nAdelie": 2,
-          "nChinstrap": 40
+          "samples": 60,
+          "nAdelie": 17,
+          "nChinstrap": 43
         }
       ],
-      "image": "/trees/depth2-leaf30.png"
+      "image": "/trees/depth2-leaf60.png"
     }
   }
 }

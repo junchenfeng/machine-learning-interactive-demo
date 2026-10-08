@@ -20,7 +20,7 @@
 │   ├── server.ts       # Express 服务入口
 │   └── vite.ts         # Vite 中间件集成
 ├── public/             # 静态资源
-│   └── trees/          # sklearn 预生成决策树图（depth{1,2}-leaf{10,30}.png）
+│   └── trees/          # sklearn 预生成决策树图（depth{1,2}-leaf{10,60}.png）
 ├── src/                # 前端源码
 │   ├── charts/         # ECharts 封装（penguin-chart.ts 含决策虚线能力）
 │   ├── components/     # Tab 页面：tab1-species / tab2-dataset / tab3-explore / tab4-classify / tab5-model、header
@@ -43,9 +43,9 @@
 ## 预生成决策树说明（训练决策树页，Tab5）
 
 - 生成脚本：`python3 scripts/generate_tree_models.py`（需 scikit-learn + matplotlib，见脚本头注释）。产物：`public/trees/*.png` + `src/data/tree-models.json`，前端只查表渲染。
-- 模型：sklearn DecisionTreeClassifier（gini），Adelie vs Chinstrap，2007-2008 训练集 100% 训练（无 train-test 划分，教学允许过拟合），全 4 特征，4 组参数 = max_depth(1,2) × min_samples_leaf(10,30)。
+- 模型：sklearn DecisionTreeClassifier（gini），Adelie vs Chinstrap，2007-2008 训练集 100% 训练（无 train-test 划分，教学允许过拟合），全 4 特征，4 组参数 = max_depth(1,2) × min_samples_leaf(10,60)。
+- 结果特征：min-leaf=60 时 depth 1/2 树完全相同（第一层切完后每堆不足 60 只，无法二次分裂），准确率 87.4%；min-leaf=10 时 95.8%（第二层切分只提纯不翻转判断）。前端提示文案按叶子数与成绩动态比较，勿改回"对比成绩"式静态文案。
 - 树图节点配色经 monkeypatch `_color_brew` 映射为全站物种规范色（Adelie #3D6FB4 / Chinstrap #D2601F）；中文字体使用文泉驿微米黑。
-- 结果特征：4 组参数的准确率相同（95.8%，第二层切分不改变叶子多数类），前端提示文案据此做了动态比较，勿改回"对比成绩"式静态文案。
 
 ## 包管理规范
 

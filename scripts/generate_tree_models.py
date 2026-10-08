@@ -1,6 +1,6 @@
 # ABOUTME: 预生成 Tab4 决策树模型产物。
 # 在 Adelie vs Chinstrap（2007-2008 训练集，100% 训练，不做 train-test 划分）上，
-# 对 4 组参数（max_depth 1/2 × min_samples_leaf 10/30）训练 sklearn 决策树，
+# 对 4 组参数（max_depth 1/2 × min_samples_leaf 10/60）训练 sklearn 决策树，
 # 输出树图 PNG 到 public/trees/，指标 JSON 到 src/data/tree-models.json。
 # 用法：python3 scripts/generate_tree_models.py（需已安装 scikit-learn、matplotlib）
 
@@ -29,7 +29,7 @@ FEATURES = [
     ("flipper", "翅膀长度（毫米）"),
     ("mass", "体重（克）"),
 ]
-COMBOS = [(1, 10), (1, 30), (2, 10), (2, 30)]
+COMBOS = [(1, 10), (1, 60), (2, 10), (2, 60)]
 # 物种规范色（与全站一致，0-255 整数制，sklearn _color_brew 要求）：Adelie #3D6FB4 / Chinstrap #D2601F
 BRAND_PALETTE = [(61, 111, 180), (210, 96, 31)]
 
