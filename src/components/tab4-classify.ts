@@ -186,7 +186,7 @@ export function renderClassify(container: HTMLElement): ClassifyTab {
         'sex',
         '问题二 · 用一条线分开公企鹅和母企鹅',
         '同种企鹅公母差别不大，三种企鹅混在一起分。这条线还能分对多少？',
-        `<span class="flex items-center gap-0.5">${symbolSvg('circle', '#E15A85', 15)}${symbolSvg('circle', '#2F5D8A', 15)}</span>`,
+        `<span class="flex items-center gap-0.5">${symbolSvg('circle', '#16A34A', 15)}${symbolSvg('circle', '#2F5D8A', 15)}</span>`,
         '三种企鹅一起分',
       )}
     </div>
@@ -203,7 +203,7 @@ export function renderClassify(container: HTMLElement): ClassifyTab {
     <!-- 主体：左图 + 右指标 -->
     <div class="card fade-up mt-6 p-5 md:p-6">
       <div id="classify-legend" class="legend-bar mb-4"></div>
-      <div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_330px]">
+      <div class="grid grid-cols-[minmax(0,1fr)_300px] gap-4">
         <div class="min-w-0">
           <div id="classify-chart" class="w-full" style="height:380px"></div>
           <p class="mt-3 text-xs leading-relaxed text-mist">

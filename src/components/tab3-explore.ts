@@ -91,7 +91,7 @@ export function renderExplore(container: HTMLElement): ExploreTab {
         'sex',
         '问题二 · 区分公企鹅和母企鹅',
         '同一种企鹅里，公的和母的身材差别不大。颜色代表公母、形状代表物种，看看能否分得开？',
-        `<span class="flex items-center gap-0.5">${symbolSvg('circle', '#E15A85', 15)}${symbolSvg('circle', '#2F5D8A', 15)}</span>`,
+        `<span class="flex items-center gap-0.5">${symbolSvg('circle', '#16A34A', 15)}${symbolSvg('circle', '#2F5D8A', 15)}</span>`,
         '颜色 = 公母 · 形状 = 物种',
       )}
     </div>

@@ -65,7 +65,7 @@ export const SPECIES_META: Record<Species, SpeciesMeta> = {
   },
   Chinstrap: {
     cn: '帽带企鹅',
-    color: '#D2601F',
+    color: '#16A34A',
     symbol: 'triangle',
     symbolLabel: '三角',
     latin: 'Pygoscelis antarcticus',
@@ -114,7 +114,7 @@ export const FEATURES: FeatureMeta[] = [
 ];
 
 export const SEX_META: Record<Sex, { label: string; color: string }> = {
-  female: { label: '母企鹅', color: '#E15A85' },
+  female: { label: '母企鹅', color: '#16A34A' },
   male: { label: '公企鹅', color: '#2F5D8A' },
 };
 

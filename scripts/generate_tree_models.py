@@ -30,8 +30,8 @@ FEATURES = [
     ("mass", "体重（克）"),
 ]
 COMBOS = [(1, 10), (1, 60), (2, 10), (2, 60)]
-# 物种规范色（与全站一致，0-255 整数制，sklearn _color_brew 要求）：Adelie #3D6FB4 / Chinstrap #D2601F
-BRAND_PALETTE = [(61, 111, 180), (210, 96, 31)]
+# 物种规范色（与全站一致，0-255 整数制，sklearn _color_brew 要求）：Adelie #3D6FB4 / Chinstrap #16A34A
+BRAND_PALETTE = [(61, 111, 180), (22, 163, 74)]
 
 
 def setup_font() -> None:
@@ -203,7 +203,7 @@ def main() -> None:
             "palette": {
                 "note": "节点颜色 = 该节点偏向哪一类（越深越确定）",
                 "Adelie": "#3D6FB4",
-                "Chinstrap": "#D2601F",
+                "Chinstrap": "#16A34A",
             },
         },
         "combos": combos,

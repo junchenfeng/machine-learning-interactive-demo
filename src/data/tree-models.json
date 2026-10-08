@@ -20,7 +20,7 @@
     "palette": {
       "note": "节点颜色 = 该节点偏向哪一类（越深越确定）",
       "Adelie": "#3D6FB4",
-      "Chinstrap": "#D2601F"
+      "Chinstrap": "#16A34A"
     }
   },
   "combos": {

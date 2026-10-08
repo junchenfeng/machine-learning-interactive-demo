@@ -45,7 +45,7 @@
 - 生成脚本：`python3 scripts/generate_tree_models.py`（需 scikit-learn + matplotlib，见脚本头注释）。产物：`public/trees/*.png` + `src/data/tree-models.json`，前端只查表渲染。
 - 模型：sklearn DecisionTreeClassifier（gini），Adelie vs Chinstrap，2007-2008 训练集 100% 训练（无 train-test 划分，教学允许过拟合），全 4 特征，4 组参数 = max_depth(1,2) × min_samples_leaf(10,60)。
 - 结果特征：min-leaf=60 时 depth 1/2 树完全相同（第一层切完后每堆不足 60 只，无法二次分裂），准确率 87.4%；min-leaf=10 时 95.8%（第二层切分只提纯不翻转判断）。前端提示文案按叶子数与成绩动态比较，勿改回"对比成绩"式静态文案。
-- 树图节点配色经 monkeypatch `_color_brew` 映射为全站物种规范色（Adelie #3D6FB4 / Chinstrap #D2601F）；中文字体使用文泉驿微米黑。
+- 树图节点配色经 monkeypatch `_color_brew` 映射为全站物种规范色（Adelie #3D6FB4 / Chinstrap #16A34A）；中文字体使用文泉驿微米黑。
 
 ## 包管理规范
 
